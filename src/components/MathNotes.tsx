@@ -71,7 +71,7 @@ Return a JSON array of evaluated expressions: [{ "original": "x=5", "result": "5
 If an equation is a graphable function (e.g., y=x^2), include "graph": "x^2" in the object. 
 DO NOT wrap the JSON in markdown blocks like \`\`\`json. Return ONLY the raw JSON array string.`;
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
