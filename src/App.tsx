@@ -27,6 +27,12 @@ function App() {
           </div>
         </div>
 
+        {/* Mobile / Desktop Status Badge */}
+        <div className="aura-header-status-pill">
+          <span className="aura-status-dot" />
+          <span className="aura-status-text">CYBER v2.0</span>
+        </div>
+
         {/* Futuristic Glassmorphic Navigation Tabs */}
         <nav className="aura-tabs">
           <button 

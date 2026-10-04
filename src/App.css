@@ -2967,173 +2967,675 @@ body, html {
    VIEWPORT RESPONSIVENESS (Mobile, Tablet, Desktop)
    ========================================================================== */
 
-/* Mobile Viewport (< 640px): Thumb-friendly floating bottom-sheet */
+/* Mobile Viewport (< 640px): Ultra-Modern Native Mobile App Layout */
 @media (max-width: 640px) {
-  /* Navigation Bar on Mobile */
-  .aura-nav-header {
-    height: auto;
-    padding: 10px 14px;
+  /* Prevent horizontal screen bouncing & ensure full viewport containment */
+  html, body {
+    overflow-x: hidden;
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    touch-action: pan-y;
+  }
+
+  .aura-app-root {
+    height: 100dvh;
+    min-height: 100dvh;
+    display: flex;
     flex-direction: column;
-    gap: 10px;
-    align-items: stretch;
-    background: rgba(14, 14, 18, 0.94);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    overflow: hidden;
+    background-color: #07070A;
+  }
+
+  /* Ultra-sleek single-row mobile app header */
+  .aura-nav-header {
+    height: 50px;
+    min-height: 50px;
+    padding: 0 16px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(10, 10, 16, 0.94);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    z-index: 50;
   }
 
   .aura-brand {
-    justify-content: space-between;
-    width: 100%;
+    gap: 10px;
+  }
+
+  .aura-logo-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+  }
+
+  .aura-spark-icon {
+    width: 16px;
+    height: 16px;
   }
 
   .aura-title {
-    font-size: 15px;
+    font-size: 14.5px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+  }
+
+  .aura-tagline {
+    font-size: 8px;
+    letter-spacing: 0.6px;
+  }
+
+  /* Header status pill for mobile */
+  .aura-header-status-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: rgba(0, 242, 254, 0.1);
+    border: 1px solid rgba(0, 242, 254, 0.25);
+    border-radius: 9999px;
+    font-size: 10.5px;
     font-weight: 700;
-    letter-spacing: -0.3px;
+    color: #00f2fe;
+    letter-spacing: 0.5px;
   }
 
+  .aura-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #00f2fe;
+    box-shadow: 0 0 8px #00f2fe;
+  }
+
+  /* Fixed Glassmorphic Bottom Navigation Dock */
   .aura-tabs {
-    width: 100%;
-    overflow-x: auto;
-    scrollbar-width: none;
-    padding: 3px;
-    gap: 4px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .aura-tabs::-webkit-scrollbar {
-    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: rgba(12, 12, 18, 0.95);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 6px 12px calc(6px + env(safe-area-inset-bottom, 0px)) 12px;
+    z-index: 999;
+    box-shadow: 0 -10px 32px rgba(0, 0, 0, 0.85);
+    gap: 8px;
   }
 
   .aura-tab {
-    padding: 6px 12px;
-    font-size: 11.5px;
-    font-weight: 600;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .aura-main-content {
-    padding: 6px 4px 60px 4px;
-  }
-
-  /* Gen Z Calculator Page on Mobile */
-  .genz-calc-page {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
     padding: 6px 4px;
-    min-height: calc(100vh - 140px);
-    border-radius: 20px;
-    align-items: flex-end;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 14px;
+    white-space: nowrap;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .mobile-sheet-pill-handle {
-    display: block;
+  .aura-tab svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .aura-tab.active.calc {
+    background: rgba(177, 156, 217, 0.22);
+    border: 1px solid rgba(177, 156, 217, 0.5);
+    color: #B19CD9;
+    box-shadow: 0 0 16px rgba(177, 156, 217, 0.3);
+  }
+
+  .aura-tab.active.notes {
+    background: rgba(0, 242, 254, 0.2);
+    border: 1px solid rgba(0, 242, 254, 0.5);
+    color: #00f2fe;
+    box-shadow: 0 0 16px rgba(0, 242, 254, 0.3);
+  }
+
+  .aura-tab.active.conv {
+    background: rgba(119, 221, 119, 0.2);
+    border: 1px solid rgba(119, 221, 119, 0.5);
+    color: #77DD77;
+    box-shadow: 0 0 16px rgba(119, 221, 119, 0.3);
+  }
+
+  /* Main Surface: exact fit between top header and bottom nav dock */
+  .aura-main-content {
+    flex: 1;
+    height: calc(100dvh - 50px - 60px - env(safe-area-inset-bottom, 0px));
+    padding: 6px 8px 6px 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+  }
+
+  .aura-card-wrapper {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .aura-card-wrapper.notes {
+    max-width: 100%;
+    height: 100%;
+  }
+
+  .aura-card-wrapper.converter {
+    max-width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Completely hide floating overlays that obstruct controls on mobile */
+  .aura-float-switcher-wrapper {
+    display: none !important;
+  }
+
+  .aura-footer {
+    display: none !important;
+  }
+
+  /* ========================================================================
+     1. AURA CALC (GEN Z CALCULATOR) MOBILE OPTIMIZATIONS
+     ======================================================================== */
+  .aura-card-wrapper.genz {
+    max-width: 100%;
+    padding: 0;
+    height: 100%;
+  }
+
+  .genz-calc-page {
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0;
   }
 
   .genz-glass-card {
     max-width: 100%;
     width: 100%;
-    border-radius: 28px;
-    padding: 16px 14px 18px 14px;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
-    margin: 0 auto;
+    height: 100%;
+    border-radius: 22px;
+    padding: 10px 10px 10px 10px;
+    gap: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.65);
+    background: rgba(18, 18, 26, 0.85);
   }
 
-  .genz-display-wrapper {
-    min-height: 90px;
-    padding: 10px 12px;
+  .genz-card-header {
+    height: 26px;
+    padding-bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
-  .display-main-digits {
-    font-size: clamp(34px, 9vw, 50px);
-    letter-spacing: -1px;
-  }
-
-  .keypad-primary-grid {
+  .header-brand-group {
     gap: 8px;
   }
 
-  .pill-btn {
-    height: 56px; /* Oversized thumb-friendly hit target */
-    font-size: 20px;
-    border-radius: 9999px;
+  .genz-brand-title {
+    font-size: 13.5px;
+    font-weight: 800;
   }
 
-  .pill-btn.btn-num {
-    font-size: 22px;
+  .genz-vibe-tag {
+    display: none;
+  }
+
+  .header-controls-group {
+    gap: 6px;
+  }
+
+  .genz-icon-btn {
+    padding: 5px 8px;
+    font-size: 12px;
+    border-radius: 10px;
+    touch-action: manipulation;
   }
 
   .desktop-only {
     display: none !important;
   }
 
+  /* Mini History Ticker */
+  .genz-history-ticker {
+    height: 24px;
+    padding: 0 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ticker-trail {
+    max-width: 110px;
+  }
+
+  .trail-text {
+    font-size: 11px;
+  }
+
+  .ticker-chips-row {
+    gap: 5px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .ticker-chips-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ticker-chip {
+    padding: 2px 8px;
+    font-size: 10.5px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    touch-action: manipulation;
+  }
+
+  /* Display Area */
+  .genz-display-wrapper {
+    min-height: 64px;
+    max-height: 84px;
+    padding: 6px 12px;
+    border-radius: 16px;
+    gap: 2px;
+    background: rgba(10, 10, 15, 0.6);
+  }
+
+  .display-preview-row {
+    min-height: 18px;
+  }
+
+  .display-preview-bubble {
+    font-size: 12px;
+    padding: 1px 7px;
+  }
+
+  .copy-action-pill {
+    padding: 2px 7px;
+    font-size: 10.5px;
+  }
+
+  .display-main-digits {
+    font-size: clamp(32px, 9vw, 44px) !important;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+  }
+
+  /* Keypad Container & Matrix */
+  .genz-keypad-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 6px;
+    min-height: 0;
+  }
+
+  .scientific-strip-row {
+    padding: 0 0 4px 0;
+    gap: 5px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .scientific-strip-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pill-btn.sci-btn {
+    min-width: 44px;
+    height: 32px;
+    font-size: 11.5px;
+    padding: 4px 8px;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+
+  .keypad-primary-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 6px;
+    min-height: 0;
+  }
+
+  .pill-btn {
+    height: 100%;
+    min-height: 42px;
+    max-height: 58px;
+    font-size: 20px;
+    font-weight: 700;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: transform 0.08s ease, filter 0.08s ease;
+  }
+
+  .pill-btn.btn-num {
+    font-size: 21px;
+  }
+
+  .pill-btn:active {
+    transform: scale(0.92);
+    filter: brightness(1.3);
+  }
+
   /* Side Panel Drawer as Mobile Bottom Sheet */
   .genz-side-panel {
     top: auto;
     bottom: 0;
-    right: 0;
     left: 0;
+    right: 0;
     width: 100%;
-    max-height: 82vh;
-    border-radius: 28px 28px 0 0;
-    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.7);
-    animation: slideUpSheet 0.24s cubic-bezier(0.175, 0.885, 0.32, 1.15);
+    max-height: 80vh;
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -14px 44px rgba(0, 0, 0, 0.9);
+    animation: slideUpSheet 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.15);
   }
 
-  /* iPadOS Switcher on Mobile */
-  .ipados-float-switcher-wrapper {
-    bottom: 12px;
-    left: 12px;
-    z-index: 70;
+  /* ========================================================================
+     2. CYBER MATH NOTES MOBILE OPTIMIZATIONS
+     ======================================================================== */
+  .futuristic-math-notes-root {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-color: rgba(0, 242, 254, 0.2);
   }
 
-  .ipados-float-switcher-btn {
-    width: 38px;
-    height: 38px;
-  }
-
-  /* Apple Math Notes Mobile Refinements */
-  .apple-math-notes-root {
-    border-radius: 18px;
-  }
-
-  .apple-notes-header {
+  .futuristic-header {
     height: auto;
     padding: 8px 10px;
+    display: flex;
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: rgba(14, 14, 20, 0.92);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .f-header-left {
+    order: 1;
     gap: 8px;
   }
 
-  .apple-workspace.split {
-    flex-direction: column;
+  .f-glow-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
   }
 
-  .floating-pencil-kit {
-    bottom: 10px;
-    padding: 6px 10px;
-    max-width: 95%;
-    overflow-x: auto;
-    scrollbar-width: none;
+  .f-title {
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .f-subtitle {
+    font-size: 9px;
+  }
+
+  .f-header-right {
+    order: 2;
     gap: 6px;
   }
 
-  .floating-pencil-kit::-webkit-scrollbar {
+  .f-mode-pill-toggle {
+    padding: 2px;
+    gap: 2px;
+  }
+
+  .f-mode-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+    gap: 4px;
+    border-radius: 8px;
+  }
+
+  .f-icon-pill {
+    padding: 5px 8px;
+    font-size: 11px;
+    border-radius: 8px;
+  }
+
+  .f-presets-chips {
+    order: 3;
+    width: 100%;
+    display: flex;
+    gap: 5px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+
+  .f-presets-chips::-webkit-scrollbar {
     display: none;
   }
 
-  .tool-item span,
-  .kit-demo-btn span,
-  .kit-solve-btn span {
+  .f-preset-chip {
+    padding: 4px 9px;
+    font-size: 11px;
+    border-radius: 9999px;
+    flex-shrink: 0;
+  }
+
+  .futuristic-main-surface {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 6px;
+    height: auto;
+  }
+
+  .f-smart-pad-scroll {
+    padding: 4px;
+  }
+
+  .f-lines-container {
+    gap: 8px;
+  }
+
+  .f-line-row {
+    padding-left: 0;
+    gap: 6px;
+  }
+
+  .f-line-num {
     display: none;
   }
 
-  .tool-item,
-  .kit-demo-btn,
-  .kit-solve-btn {
-    padding: 6px 8px;
+  .f-input-wrapper {
+    padding: 6px 10px;
+    gap: 6px;
+    border-radius: 12px;
+  }
+
+  .f-line-input {
+    font-size: 14.5px;
+  }
+
+  .f-holo-answer-badge {
+    font-size: 13px;
+    padding: 2px 7px;
+    border-radius: 7px;
+  }
+
+  .f-scrubber-glow-slider {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .f-graph-holo-box {
+    width: 100%;
+    max-width: 100%;
+    height: 240px;
+    border-radius: 14px;
+  }
+
+  /* Stylus Canvas in Draw Mode */
+  .f-stylus-canvas-container {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    touch-action: none !important;
+  }
+
+  .f-canvas-status-pill {
+    top: 8px;
+    font-size: 11px;
+    padding: 3px 10px;
+  }
+
+  .f-floating-stylus-dock {
+    bottom: 10px;
+    padding: 4px 8px;
+    gap: 6px;
+    max-width: 96%;
+    width: auto;
+    border-radius: 9999px;
+    background: rgba(14, 14, 20, 0.92);
+  }
+
+  .f-dock-colors {
+    gap: 4px;
+  }
+
+  .f-color-dot {
+    width: 13px;
+    height: 13px;
+  }
+
+  .f-dock-action-btn {
+    padding: 4px 7px;
+    font-size: 11px;
+  }
+
+  .f-dock-action-btn span {
+    display: none;
+  }
+
+  .f-dock-icon-btn {
+    padding: 4px;
+  }
+
+  .f-dock-solve-btn {
+    padding: 5px 12px;
+    font-size: 11.5px;
+    font-weight: 700;
+  }
+
+  .f-variables-hud-panel {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-height: 75vh;
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.85);
+    animation: slideUpSheet 0.22s ease;
+  }
+
+  /* ========================================================================
+     3. FLUX CONVERTER MOBILE OPTIMIZATIONS
+     ======================================================================== */
+  .aura-converter-card {
+    border-radius: 20px;
+    padding: 16px 12px;
+    gap: 14px;
+  }
+
+  .converter-header {
+    gap: 10px;
+    padding-bottom: 8px;
+  }
+
+  .converter-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+  }
+
+  .converter-title {
+    font-size: 16px;
+  }
+
+  .converter-desc {
+    font-size: 11px;
+  }
+
+  .aura-category-chips {
+    gap: 6px;
+    padding-bottom: 4px;
+  }
+
+  .aura-chip {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .converter-boxes-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .aura-unit-card {
+    padding: 12px 14px;
+    border-radius: 14px;
+    gap: 6px;
+  }
+
+  .aura-unit-input {
+    font-size: 28px;
+  }
+
+  .aura-swap-btn {
+    margin: 2px auto;
+    width: 40px;
+    height: 40px;
   }
 }
 
@@ -3145,6 +3647,10 @@ body, html {
 
   .pill-btn {
     height: 56px;
+  }
+
+  .aura-header-status-pill {
+    display: none;
   }
 }
 
@@ -3161,6 +3667,10 @@ body, html {
 
   .pill-btn {
     height: 60px;
+  }
+
+  .aura-header-status-pill {
+    display: none;
   }
 }
 
