@@ -131,9 +131,10 @@ const BasicCalculator = ({ isScientific, onToggleScientific }: Props) => {
 
   return (
     <>
-      <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 10 }}>
+      <div style={{ position: 'absolute', top: 25, left: 30 }}>
         <button 
-          className="btn sci-toggle" 
+          className="btn sci" 
+          style={{ width: 40, height: 40, borderRadius: '50%' }}
           onClick={onToggleScientific}
           title="Scientific Mode"
         >

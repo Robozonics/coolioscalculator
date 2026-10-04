@@ -30,31 +30,13 @@ body, html {
   background: #000;
 }
 
-/* The Main Container (Pure Apple Flat Style) */
 .glass-panel {
-  position: relative;
   width: 100%;
   height: 100%;
   max-width: 100%;
   display: flex;
   flex-direction: column;
   background: #000;
-  transition: max-width 0.3s ease;
-}
-
-@media (min-width: 768px) {
-  .glass-panel {
-    max-width: 400px;
-    height: 90vh;
-    border-radius: 20px;
-    border: 1px solid #222;
-  }
-  .glass-panel.scientific-open {
-    max-width: 800px;
-  }
-  .glass-panel.notes-open {
-    max-width: 1000px;
-  }
 }
 
 /* Top Toolbar */
@@ -108,7 +90,7 @@ body, html {
 }
 
 .expr-display {
-  font-size: min(7vw, 30px);
+  font-size: clamp(20px, 4vw, 40px);
   color: var(--text-muted);
   min-height: 40px;
   word-break: break-all;
@@ -116,7 +98,7 @@ body, html {
 }
 
 .res-display {
-  font-size: min(20vw, 90px);
+  font-size: clamp(50px, 10vw, 120px);
   font-weight: 300;
   color: var(--text);
   line-height: 1;
@@ -125,80 +107,64 @@ body, html {
   letter-spacing: -1px;
 }
 
-.res-display.long { font-size: min(14vw, 60px); }
-.res-display.very-long { font-size: min(9vw, 40px); }
-
 .keypad-container {
   display: flex;
   gap: 12px;
   justify-content: center;
+  height: 60vh;
+  max-height: 800px;
 }
 
 .keypad-basic {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(5, 1fr);
   gap: 12px;
   width: 100%;
-  max-width: 400px;
+  height: 100%;
 }
 
 .keypad-sci {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(5, 1fr);
   gap: 12px;
-  flex: 1;
+  width: 100%;
+  height: 100%;
   padding-right: 12px;
 }
 
 .btn {
   background: var(--btn-num);
   border: none;
-  border-radius: 50%;
+  border-radius: 9999px;
   color: #fff;
-  font-size: min(8vw, 32px);
-  aspect-ratio: 1;
+  font-size: clamp(20px, 4vmin, 40px);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  max-width: 90px;
-  max-height: 90px;
-  margin: 0 auto;
   width: 100%;
+  height: 100%;
+  margin: 0;
 }
 
 .btn:active {
   background: var(--btn-num-active);
 }
 
-.btn.op { background: var(--btn-op); font-size: min(10vw, 40px); }
+.btn.op { background: var(--btn-op); font-size: clamp(24px, 5vmin, 45px); }
 .btn.op:active { background: var(--btn-op-active); }
-.btn.sec { background: var(--btn-sec); color: #000; font-weight: 500; font-size: min(7vw, 28px); }
+.btn.sec { background: var(--btn-sec); color: #000; font-weight: 500; font-size: clamp(18px, 4vmin, 32px); }
 .btn.sec:active { background: var(--btn-sec-active); }
 .btn.zero { 
   grid-column: span 2; 
-  border-radius: 50px; 
-  aspect-ratio: auto; 
+  border-radius: 9999px; 
   justify-content: flex-start; 
-  padding-left: min(8vw, 30px); 
-  max-width: none;
-  width: 100%;
+  padding-left: 20%; 
 }
-.btn.sci { font-size: min(4vw, 16px); background: #222; }
+.btn.sci { font-size: clamp(14px, 3vmin, 24px); background: #222; }
 .btn.sci:active { background: #444; }
-
-.btn.sci-toggle {
-  background: #222;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  cursor: pointer;
-}
-.btn.sci-toggle:active { background: #444; }
 
 /* Math Notes Canvas */
 .math-notes {
@@ -269,7 +235,7 @@ body, html {
 
 .graph-overlay {
   position: absolute; bottom: 100px; right: 30px; 
-  width: 400px; height: 300px; 
+  width: min(90vw, 400px); height: min(50vh, 300px); 
   background: #000; 
   border-radius: 12px; padding: 20px; 
   border: 1px solid #333;
