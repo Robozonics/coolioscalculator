@@ -4403,4 +4403,23 @@ body, html {
   }
 }
 
+/* Fix for mobile bottom dock positioning bug caused by backdrop-filter containing block */
+.mobile-tabs {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .desktop-tabs {
+    display: none !important;
+  }
+  .mobile-tabs {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+  }
+}
+
 

@@ -33,8 +33,8 @@ function App() {
           <span className="aura-status-text">CYBER v2.0</span>
         </div>
 
-        {/* Futuristic Glassmorphic Navigation Tabs */}
-        <nav className="aura-tabs">
+        {/* Desktop Navigation Tabs */}
+        <nav className="aura-tabs desktop-tabs">
           <button 
             className={`aura-tab ${mode === 'aura' ? 'active calc' : ''}`}
             onClick={() => setMode('aura')}
@@ -63,6 +63,36 @@ function App() {
           </button>
         </nav>
       </header>
+
+      {/* Mobile Navigation Tabs (Fixed to bottom, outside backdrop-filter container) */}
+      <nav className="aura-tabs mobile-tabs">
+        <button 
+          className={`aura-tab ${mode === 'aura' ? 'active calc' : ''}`}
+          onClick={() => setMode('aura')}
+          title="Aura Calc - Tactile Gen Z Calculator"
+        >
+          <Sparkles size={15} />
+          <span>Aura Calc</span>
+        </button>
+
+        <button 
+          className={`aura-tab ${mode === 'notes' ? 'active notes' : ''}`}
+          onClick={() => setMode('notes')}
+          title="Cyber Notes - Holographic Math Pad & Stylus"
+        >
+          <Pencil size={15} />
+          <span>Cyber Notes</span>
+        </button>
+        
+        <button 
+          className={`aura-tab ${mode === 'converter' ? 'active conv' : ''}`}
+          onClick={() => setMode('converter')}
+          title="Flux Converter - Precision Unit & Currency Engine"
+        >
+          <ArrowLeftRight size={15} />
+          <span>Flux Converter</span>
+        </button>
+      </nav>
 
       {/* Main Surface Viewport */}
       <main className="aura-main-content">
