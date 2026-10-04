@@ -1,0 +1,358 @@
+:root {
+  --bg-color: #000000;
+  --text-primary: #ffffff;
+  --btn-bg: #333333;
+  --btn-bg-active: #737373;
+  --btn-op: #ff9f0a;
+  --btn-op-active: #ffb340;
+  --btn-secondary: #a5a5a5;
+  --btn-secondary-text: #000000;
+  --sidebar-bg: #1c1c1e;
+  --sidebar-border: #38383a;
+  --panel-bg: rgba(28, 28, 30, 0.7);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  user-select: none;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+}
+
+.app-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  position: relative;
+}
+
+/* Sidebar History */
+.sidebar {
+  width: 300px;
+  background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: absolute;
+  height: 100%;
+  z-index: 10;
+  transform: translateX(-100%);
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
+.sidebar-header {
+  padding: 20px;
+  font-size: 20px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+
+.history-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.history-item {
+  padding: 15px;
+  border-bottom: 1px solid var(--sidebar-border);
+  text-align: right;
+}
+
+.history-expr {
+  color: #8e8e93;
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.history-res {
+  font-size: 24px;
+  font-weight: 500;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.main-content.shifted {
+  margin-left: 300px; /* Only applies nicely on wider screens, otherwise overlaps */
+}
+
+@media (max-width: 768px) {
+  .main-content.shifted {
+    margin-left: 0;
+  }
+}
+
+/* Top Navigation / Toolbar */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  height: 60px;
+  background: transparent;
+  z-index: 5;
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--btn-op);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.icon-btn:hover {
+  background: rgba(255, 159, 10, 0.2);
+}
+
+.mode-selector {
+  display: flex;
+  background: #1c1c1e;
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.mode-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mode-btn.active {
+  background: #3a3a3c;
+  font-weight: 600;
+}
+
+/* Calculator View */
+.calc-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: flex-end;
+  padding: 20px;
+  padding-bottom: 40px;
+}
+
+.display-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding: 20px;
+}
+
+.expression-text {
+  color: #8e8e93;
+  font-size: 30px;
+  min-height: 40px;
+  margin-bottom: 10px;
+  word-wrap: break-word;
+  max-width: 100%;
+}
+
+.result-text {
+  color: white;
+  font-size: 80px;
+  font-weight: 300;
+  line-height: 1;
+  word-break: break-all;
+  max-width: 100%;
+}
+
+@media (max-width: 480px) {
+  .result-text { font-size: 60px; }
+  .expression-text { font-size: 20px; }
+}
+
+/* Keypad Grid */
+.keypad {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, 1fr);
+  max-width: 500px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.keypad.scientific {
+  grid-template-columns: repeat(10, 1fr);
+  max-width: 1200px;
+}
+
+@media (max-width: 800px) {
+  .keypad.scientific {
+    grid-template-columns: repeat(4, 1fr); /* Mobile layout doesn't usually show full sci grid horizontally */
+  }
+}
+
+.btn {
+  background: var(--btn-bg);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 32px;
+  aspect-ratio: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.1s, filter 0.1s;
+  user-select: none;
+}
+
+.btn:active {
+  background: var(--btn-bg-active);
+}
+
+.btn.op {
+  background: var(--btn-op);
+}
+
+.btn.op:active {
+  background: var(--btn-op-active);
+}
+
+.btn.secondary {
+  background: var(--btn-secondary);
+  color: var(--btn-secondary-text);
+}
+
+.btn.secondary:active {
+  background: #d4d4d2;
+}
+
+.btn.zero {
+  grid-column: span 2;
+  aspect-ratio: auto;
+  border-radius: 50px;
+  justify-content: flex-start;
+  padding-left: 30px;
+}
+
+/* Scientific functions (hidden by default on mobile unless landscape) */
+.sci-btn {
+  background: #2c2c2e;
+  font-size: 20px;
+}
+
+/* Math Notes */
+.math-notes-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: #1c1c1e;
+  border-radius: 12px;
+  margin: 20px;
+  overflow: hidden;
+}
+
+.canvas-wrapper {
+  flex: 1;
+  cursor: crosshair;
+}
+
+.math-notes-overlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  pointer-events: none;
+}
+
+.notes-tools {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  background: rgba(40, 40, 40, 0.8);
+  padding: 10px 20px;
+  border-radius: 30px;
+  backdrop-filter: blur(10px);
+}
+
+.notes-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+}
+
+.notes-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Unit Converter */
+.converter-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.unit-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: #1c1c1e;
+  border-radius: 16px;
+  margin-bottom: 10px;
+}
+
+.unit-val {
+  font-size: 40px;
+  font-weight: 500;
+  color: white;
+  background: transparent;
+  border: none;
+  text-align: right;
+  width: 100%;
+  outline: none;
+}
+
+.unit-select {
+  background: transparent;
+  color: var(--btn-op);
+  border: none;
+  font-size: 20px;
+  outline: none;
+}
