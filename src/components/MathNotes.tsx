@@ -151,9 +151,9 @@ const MathNotes = () => {
 
     let rawResults: any[] | null = null;
 
-    // Primary: Gemini 3.5 Flash
+    // Primary: Gemini Flash Latest
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_KEY}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_KEY}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -166,45 +166,18 @@ const MathNotes = () => {
         })
       });
 
-      const data = await response.json();
-      if (response.ok && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-        const text = data.candidates[0].content.parts[0].text.trim();
-        const match = text.match(/\[.*\]/s);
-        if (match) {
-          rawResults = JSON.parse(match[0]);
-        }
-      }
-    } catch (geminiErr) {
-      console.warn("Gemini 3.5 flash attempt failed:", geminiErr);
-    }
-
-    // Secondary: Gemini 3 Flash Preview fallback
-    if (!rawResults) {
-      try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${GEMINI_KEY}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [
-                { text: prompt },
-                { inlineData: { mimeType: "image/jpeg", data: base64Data } }
-              ]
-            }]
-          })
-        });
-
+      if (response.ok) {
         const data = await response.json();
-        if (response.ok && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+        if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
           const text = data.candidates[0].content.parts[0].text.trim();
           const match = text.match(/\[.*\]/s);
           if (match) {
             rawResults = JSON.parse(match[0]);
           }
         }
-      } catch (geminiPrevErr) {
-        console.warn("Gemini preview attempt failed:", geminiPrevErr);
       }
+    } catch (geminiErr) {
+      console.warn("Gemini attempt failed:", geminiErr);
     }
 
     // Tertiary: Groq fallback with openai/gpt-oss-20b

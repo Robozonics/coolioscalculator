@@ -22,6 +22,44 @@ import { Graph3D } from './graphing/Graph3D';
 const GEMINI_KEY = ["AQ.Ab8RN6LP0y", "VkWdxBkpBAm", "-aBwmFJz", "EBlHwjwrb3E", "Cuelml_Epg"].join('');
 const GROQ_KEY = 'gsk_' + 'mf0prRR7JlB3ImtqcTvEWGdyb3FYoKyM60kbtCM2J0uthKQCEZy7';
 
+let geminiCooldownUntil = 0;
+
+function preprocessCanvasForOCR(sourceCanvas: HTMLCanvasElement): string {
+  try {
+    const offscreen = document.createElement('canvas');
+    offscreen.width = sourceCanvas.width;
+    offscreen.height = sourceCanvas.height;
+    const ctx = offscreen.getContext('2d');
+    if (!ctx) return sourceCanvas.toDataURL('image/png');
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, offscreen.width, offscreen.height);
+    ctx.drawImage(sourceCanvas, 0, 0);
+
+    const imgData = ctx.getImageData(0, 0, offscreen.width, offscreen.height);
+    const d = imgData.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const alpha = d[i + 3];
+      const brightness = (d[i] + d[i + 1] + d[i + 2]) / 3;
+      if (alpha > 40 && brightness > 30) {
+        d[i] = 0;
+        d[i + 1] = 0;
+        d[i + 2] = 0;
+        d[i + 3] = 255;
+      } else {
+        d[i] = 255;
+        d[i + 1] = 255;
+        d[i + 2] = 255;
+        d[i + 3] = 255;
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+    return offscreen.toDataURL('image/png');
+  } catch {
+    return sourceCanvas.toDataURL('image/png');
+  }
+}
+
 interface MathLine {
   id: string;
   raw: string;
@@ -355,7 +393,7 @@ export const AppleMathNotes: React.FC = () => {
     }, 450);
   };
 
-  // Solve handwritten canvas strokes
+  // Solve handwritten canvas strokes with resilient multi-tier engine
   const solveHandwriting = async () => {
     if (!sigPadRef.current || sigPadRef.current.isEmpty() || !canvasContainerRef.current) return;
     setIsSolving(true);
@@ -376,45 +414,104 @@ For each expression, return raw JSON array:
 ]`;
 
     let results: any[] | null = null;
-    try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: prompt },
-              { inlineData: { mimeType: "image/jpeg", data: base64Data } }
-            ]
-          }]
-        })
-      });
-      const data = await response.json();
-      if (response.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-        const text = data.candidates[0].content.parts[0].text.trim();
-        const match = text.match(/\[.*\]/s);
-        if (match) results = JSON.parse(match[0]);
-      }
-    } catch {
+    let engineSource = '';
+
+    // Tier 1: Gemini Vision (only if not rate-limited with 429)
+    if (Date.now() >= geminiCooldownUntil) {
       try {
-        const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_KEY}`, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${GROQ_KEY}`,
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            model: "openai/gpt-oss-20b",
-            messages: [{ role: "user", content: prompt }]
+            contents: [{
+              parts: [
+                { text: prompt },
+                { inlineData: { mimeType: "image/jpeg", data: base64Data } }
+              ]
+            }]
           })
         });
-        const groqData = await groqRes.json();
-        if (groqData.choices?.[0]?.message?.content) {
-          const match = groqData.choices[0].message.content.match(/\[.*\]/s);
-          if (match) results = JSON.parse(match[0]);
+
+        if (response.status === 429 || response.status === 503) {
+          geminiCooldownUntil = Date.now() + 5 * 60 * 1000;
+          console.warn("Gemini 429 rate-limit detected. Seamlessly activating Groq AI + local OCR.");
+        } else if (response.ok) {
+          const data = await response.json();
+          if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+            const text = data.candidates[0].content.parts[0].text.trim();
+            const match = text.match(/\[.*\]/s);
+            if (match) {
+              results = JSON.parse(match[0]);
+              engineSource = 'Gemini';
+            }
+          }
         }
-      } catch (e) {
-        console.error("OCR fallback error:", e);
+      } catch (geminiErr) {
+        console.warn("Gemini request failed, falling back:", geminiErr);
+      }
+    }
+
+    // Tier 2: Groq AI (openai/gpt-oss-20b) + Tesseract OCR Fallback
+    if (!results || results.length === 0) {
+      setStatusMessage('Solving via Groq Neural Engine...');
+      try {
+        const processedUrl = preprocessCanvasForOCR(canvas);
+        const Tesseract = (await import('tesseract.js')).default;
+        const ocrData = await Tesseract.recognize(processedUrl, 'eng');
+        const rawText = ocrData?.data?.text?.trim() || '';
+
+        const mathText = rawText
+          .replace(/[\r\n]+/g, ' ')
+          .replace(/[—–]/g, '-')
+          .replace(/[×✕]/g, '*')
+          .replace(/[÷]/g, '/')
+          .trim();
+
+        if (mathText) {
+          // Check local math engine first
+          const localEval = mathEngine.evaluateLine(mathText, 999);
+          if (localEval && localEval.evaluated !== undefined && !localEval.error) {
+            results = [{
+              original: mathText,
+              result: String(localEval.evaluated)
+            }];
+            engineSource = 'Math Engine';
+          }
+
+          // If complex or unparsed locally, solve via Groq (openai/gpt-oss-20b)
+          if (!results) {
+            const groqPrompt = `You are an iPadOS Math Notes OCR solver.
+Solve the following equation extracted from handwriting: "${mathText}".
+Return JSON ONLY in this format: [{"original": "${mathText}", "result": "answer"}]`;
+
+            const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${GROQ_KEY}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                model: "openai/gpt-oss-20b",
+                messages: [{ role: "user", content: groqPrompt }]
+              })
+            });
+
+            if (groqRes.ok) {
+              const groqData = await groqRes.json();
+              const content = groqData.choices?.[0]?.message?.content;
+              if (content) {
+                const match = content.match(/\[.*\]/s) || content.match(/\{.*\}/s);
+                if (match) {
+                  const parsed = JSON.parse(match[0]);
+                  results = Array.isArray(parsed) ? parsed : [parsed];
+                  engineSource = 'Groq AI';
+                }
+              }
+            }
+          }
+        }
+      } catch (ocrErr) {
+        console.warn("OCR + Groq fallback error:", ocrErr);
       }
     }
 
@@ -453,9 +550,9 @@ For each expression, return raw JSON array:
         };
       });
       setHandwrittenItems(items);
-      setStatusMessage('');
+      setStatusMessage(engineSource ? `Solved via ${engineSource} ✨` : 'Solved ✨');
     } else {
-      setStatusMessage('No distinct equation detected. Try writing clearly.');
+      setStatusMessage('No distinct equation detected. Try writing clearly, e.g. 24 + 36 =');
     }
     setIsSolving(false);
   };
