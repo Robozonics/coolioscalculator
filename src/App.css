@@ -32,6 +32,7 @@ body, html {
 
 /* The Main Container (Pure Apple Flat Style) */
 .glass-panel {
+  position: relative;
   width: 100%;
   height: 100%;
   max-width: 100%;
@@ -107,7 +108,7 @@ body, html {
 }
 
 .expr-display {
-  font-size: 30px;
+  font-size: min(7vw, 30px);
   color: var(--text-muted);
   min-height: 40px;
   word-break: break-all;
@@ -115,7 +116,7 @@ body, html {
 }
 
 .res-display {
-  font-size: 90px;
+  font-size: min(20vw, 90px);
   font-weight: 300;
   color: var(--text);
   line-height: 1;
@@ -124,8 +125,8 @@ body, html {
   letter-spacing: -1px;
 }
 
-.res-display.long { font-size: 60px; }
-.res-display.very-long { font-size: 40px; }
+.res-display.long { font-size: min(14vw, 60px); }
+.res-display.very-long { font-size: min(9vw, 40px); }
 
 .keypad-container {
   display: flex;
@@ -154,14 +155,14 @@ body, html {
   border: none;
   border-radius: 50%;
   color: #fff;
-  font-size: 32px;
+  font-size: min(8vw, 32px);
   aspect-ratio: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  max-width: 85px;
-  max-height: 85px;
+  max-width: 90px;
+  max-height: 90px;
   margin: 0 auto;
   width: 100%;
 }
@@ -170,21 +171,34 @@ body, html {
   background: var(--btn-num-active);
 }
 
-.btn.op { background: var(--btn-op); font-size: 40px; }
+.btn.op { background: var(--btn-op); font-size: min(10vw, 40px); }
 .btn.op:active { background: var(--btn-op-active); }
-.btn.sec { background: var(--btn-sec); color: #000; font-weight: 500; font-size: 28px; }
+.btn.sec { background: var(--btn-sec); color: #000; font-weight: 500; font-size: min(7vw, 28px); }
 .btn.sec:active { background: var(--btn-sec-active); }
 .btn.zero { 
   grid-column: span 2; 
   border-radius: 50px; 
   aspect-ratio: auto; 
   justify-content: flex-start; 
-  padding-left: 30px; 
+  padding-left: min(8vw, 30px); 
   max-width: none;
   width: 100%;
 }
-.btn.sci { font-size: 16px; background: #222; }
+.btn.sci { font-size: min(4vw, 16px); background: #222; }
 .btn.sci:active { background: #444; }
+
+.btn.sci-toggle {
+  background: #222;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+}
+.btn.sci-toggle:active { background: #444; }
 
 /* Math Notes Canvas */
 .math-notes {
