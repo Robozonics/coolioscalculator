@@ -61,17 +61,19 @@ const MathNotes = () => {
     if (!sigPad.current || sigPad.current.isEmpty()) return;
     
     setRecognizing(true);
-    try {
-      const canvas = sigPad.current.getCanvas();
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-      const base64Data = dataUrl.split(',')[1];
-      
-      const prompt = `Analyze this handwritten math canvas. Extract all equations, inequalities, logical statements, or set memberships.
+    
+    const canvas = sigPad.current.getCanvas();
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+    const base64Data = dataUrl.split(',')[1];
+    
+    const prompt = `Analyze this handwritten math canvas. Extract all equations, inequalities, logical statements, or set memberships.
 Evaluate them sequentially (e.g. if x=5 is written, use it for subsequent equations). 
 For math logic and inequalities (e.g., "7=9", "5>3", "x in {1,2,3}"), evaluate them to "true" or "false".
 Return a JSON array of evaluated expressions: [{ "original": "x=5", "result": "5" }, { "original": "7=9", "result": "false" }]. 
 If an equation is a graphable function (e.g., y=x^2), include "graph": "x^2" in the object. 
 DO NOT wrap the JSON in markdown blocks like \`\`\`json. Return ONLY the raw JSON array string.`;
+
+    try {
 
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${API_KEY}`, {
         method: 'POST',
