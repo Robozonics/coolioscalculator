@@ -94,10 +94,13 @@ body {
   flex-direction: column;
   position: relative;
   transition: margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .main-content.shifted {
-  margin-left: 300px; /* Only applies nicely on wider screens, otherwise overlaps */
+  margin-left: 300px; 
 }
 
 @media (max-width: 768px) {
@@ -204,7 +207,7 @@ body {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(4, 1fr);
-  max-width: 500px;
+  max-width: 400px;
   margin: 0 auto;
   width: 100%;
 }
