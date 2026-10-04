@@ -4331,4 +4331,16 @@ body, html {
   margin-top: 2px;
 }
 
+/* Fix alignment of canvas inside math notes on mobile and desktop */
+.futuristic-main-surface.is-draw-mode {
+  padding: 0 !important;
+  overflow: hidden !important;
+  display: flex;
+}
+.futuristic-main-surface.is-draw-mode .f-stylus-canvas-container {
+  flex: 1;
+  height: 100%;
+  width: 100%;
+}
+
 

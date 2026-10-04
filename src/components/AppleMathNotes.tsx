@@ -548,9 +548,11 @@ Return JSON ONLY as an array: [{"original": "${mathText}", "result": "answer"}]`
     }
 
     if (results && Array.isArray(results) && results.length > 0) {
-      // Calculate rightmost stroke point from user's actual drawing
+      // Calculate rightmost stroke point and height from user's actual drawing
       let maxX = 0;
       let lastY = 0;
+      let minY = Infinity;
+      let maxY = -Infinity;
       try {
         const strokeData = sigPadRef.current.toData();
         for (const group of strokeData) {
@@ -559,11 +561,15 @@ Return JSON ONLY as an array: [{"original": "${mathText}", "result": "answer"}]`
               maxX = pt.x;
               lastY = pt.y;
             }
+            if (pt.y < minY) minY = pt.y;
+            if (pt.y > maxY) maxY = pt.y;
           }
         }
       } catch {
         // ignore
       }
+
+      const strokeHeight = (maxY > minY && maxY !== -Infinity) ? (maxY - minY) : 38;
 
       const items: HandwrittenItem[] = results.map((item, idx) => {
         const defaultX = maxX > 0 ? Math.min(maxX + 14, containerW - 140) : (containerW * 0.55);
@@ -571,14 +577,17 @@ Return JSON ONLY as an array: [{"original": "${mathText}", "result": "answer"}]`
 
         const x = item.equals_x_percent ? (item.equals_x_percent / 100) * containerW : defaultX;
         const y = item.equals_y_percent ? (item.equals_y_percent / 100) * containerH : defaultY;
-        const boxH = item.height_percent ? (item.height_percent / 100) * containerH : 38;
+        
+        // Calculate font size dynamically based on user's handwriting height
+        const dynamicFontSize = Math.max(20, Math.min(100, Math.round(strokeHeight * 0.95)));
+
         return {
           id: `hw-${idx}-${Date.now()}`,
           original: item.original,
           result: String(item.result),
           x: Math.round(x + 10),
           y: Math.round(y),
-          fontSize: Math.max(24, Math.min(42, Math.round(boxH * 0.85)))
+          fontSize: dynamicFontSize
         };
       });
       setHandwrittenItems(items);
@@ -679,7 +688,7 @@ Return JSON ONLY as an array: [{"original": "${mathText}", "result": "answer"}]`
       </header>
 
       {/* Main Unified Pad Surface */}
-      <main className="futuristic-main-surface">
+      <main className={`futuristic-main-surface ${mode === 'draw' ? 'is-draw-mode' : ''}`}>
         
         {/* MODE A: Smart Typed Pad */}
         {mode === 'type' && (
