@@ -633,13 +633,48 @@ Return JSON ONLY as an array: [{"original": "${mathText}", "result": "answer"}]`
 
       {/* Top Futuristic Header */}
       <header className="futuristic-header">
-        <div className="f-header-left">
-          <div className="f-glow-badge">
-            <Zap size={16} color="#00f2fe" />
+        <div className="f-header-top-row">
+          <div className="f-header-left">
+            <div className="f-glow-badge">
+              <Zap size={16} color="#00f2fe" />
+            </div>
+            <div className="f-title-group">
+              <span className="f-title">Cyber Math Notes</span>
+              <span className="f-subtitle">Neural Reactive Engine</span>
+            </div>
           </div>
-          <div className="f-title-group">
-            <span className="f-title">Cyber Math Notes</span>
-            <span className="f-subtitle">Neural Reactive Engine</span>
+
+          {/* Top Controls */}
+          <div className="f-header-right">
+            {/* Mode Switcher: Type vs Draw */}
+            <div className="f-mode-pill-toggle">
+              <button 
+                className={`f-mode-btn ${mode === 'type' ? 'active' : ''}`}
+                onClick={() => setMode('type')}
+                title="Smart Pad Mode"
+              >
+                <Type size={14} />
+                <span>Type</span>
+              </button>
+              <button 
+                className={`f-mode-btn ${mode === 'draw' ? 'active' : ''}`}
+                onClick={() => setMode('draw')}
+                title="Neon Stylus Mode"
+              >
+                <PenTool size={14} />
+                <span>Draw</span>
+              </button>
+            </div>
+
+            {/* Variables HUD Toggle */}
+            <button 
+              className={`f-icon-pill ${showVariableHUD ? 'active' : ''}`}
+              onClick={() => setShowVariableHUD(!showVariableHUD)}
+              title="Inspect Reactive Symbol Variables"
+            >
+              <Variable size={15} />
+              <span className="hud-badge">{symbolTable.length}</span>
+            </button>
           </div>
         </div>
 
@@ -651,39 +686,6 @@ Return JSON ONLY as an array: [{"original": "${mathText}", "result": "answer"}]`
               <span className="p-title">{p.title}</span>
             </button>
           ))}
-        </div>
-
-        {/* Top Controls */}
-        <div className="f-header-right">
-          {/* Mode Switcher: Type vs Draw */}
-          <div className="f-mode-pill-toggle">
-            <button 
-              className={`f-mode-btn ${mode === 'type' ? 'active' : ''}`}
-              onClick={() => setMode('type')}
-              title="Smart Pad Mode"
-            >
-              <Type size={14} />
-              <span>Type</span>
-            </button>
-            <button 
-              className={`f-mode-btn ${mode === 'draw' ? 'active' : ''}`}
-              onClick={() => setMode('draw')}
-              title="Neon Stylus Mode"
-            >
-              <PenTool size={14} />
-              <span>Draw</span>
-            </button>
-          </div>
-
-          {/* Variables HUD Toggle */}
-          <button 
-            className={`f-icon-pill ${showVariableHUD ? 'active' : ''}`}
-            onClick={() => setShowVariableHUD(!showVariableHUD)}
-            title="Inspect Reactive Symbol Variables"
-          >
-            <Variable size={15} />
-            <span className="hud-badge">{symbolTable.length}</span>
-          </button>
         </div>
       </header>
 

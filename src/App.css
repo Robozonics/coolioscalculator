@@ -4343,4 +4343,16 @@ body, html {
   width: 100%;
 }
 
+.f-header-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+}
+.futuristic-header {
+  flex-direction: column !important;
+  align-items: stretch !important;
+}
+
 
