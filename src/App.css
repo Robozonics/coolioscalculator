@@ -1,38 +1,28 @@
 /* ==========================================================================
-   GOOGLE CALCULATOR - MATERIAL DARK THEME
-   Accurate clone of Google Search Calculator UI
+   AURA COMPUTATIONAL STUDIO - CYBERNETIC GEN Z THEME
+   Futuristic, Dark-Mode-First, Frosted Glass & Neon Accents
    ========================================================================== */
 
 :root {
-  --g-bg: #202124;
-  --g-surface: #303134;
-  --g-border: #3c4043;
-  --g-border-strong: #5f6368;
-  
-  /* Buttons */
-  --g-btn-num: #3c4043;
-  --g-btn-num-hover: #4a4e52;
-  --g-btn-num-active: #595e63;
-  
-  --g-btn-op: #5f6368;
-  --g-btn-op-hover: #6e7379;
-  --g-btn-op-active: #7d8289;
-  
-  --g-btn-sci: #3c4043;
-  --g-btn-sci-hover: #4a4e52;
-  --g-btn-sci-active: #595e63;
+  --aura-bg: #07070A;
+  --aura-surface: #0E0E14;
+  --aura-surface-glass: rgba(18, 18, 26, 0.75);
+  --aura-border: rgba(255, 255, 255, 0.08);
+  --aura-border-neon: rgba(0, 242, 254, 0.35);
 
-  --g-blue: #4285f4;
-  --g-blue-hover: #5294e2;
-  --g-blue-active: #3367d6;
-  --g-blue-light: #8ab4f8;
+  /* Neon Pastel Palette */
+  --aura-lavender: #B19CD9;
+  --aura-cyan: #00f2fe;
+  --aura-mint: #77DD77;
+  --aura-coral: #FF6961;
+  --aura-gold: #FFB347;
 
   /* Typography */
-  --g-text-main: #e8eaed;
-  --g-text-muted: #9aa0a6;
-  --g-text-dim: #70757a;
-  
-  --font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --aura-text-main: #FFFFFF;
+  --aura-text-muted: #8E8E9F;
+  --aura-text-dim: #555566;
+
+  --font-family: 'Outfit', 'Plus Jakarta Sans', -apple-system, sans-serif;
 }
 
 * {
@@ -44,8 +34,11 @@
 body, html {
   width: 100%;
   height: 100%;
-  background-color: var(--g-bg);
-  color: var(--g-text-main);
+  background-color: #07070A;
+  background-image: 
+    radial-gradient(circle at 15% 15%, rgba(177, 156, 217, 0.06) 0%, transparent 45%),
+    radial-gradient(circle at 85% 85%, rgba(0, 242, 254, 0.05) 0%, transparent 45%);
+  color: #FFFFFF;
   font-family: var(--font-family);
   user-select: none;
   -webkit-user-select: none;
@@ -53,921 +46,502 @@ body, html {
 }
 
 /* App Container */
-.google-app-root {
+.aura-app-root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--g-bg);
+  background: transparent;
+  position: relative;
 }
 
-/* Google Top Navigation Bar */
-.google-nav-header {
-  height: 60px;
+/* Futuristic Navigation Bar */
+.aura-nav-header {
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
-  border-bottom: 1px solid var(--g-border);
-  background-color: var(--g-bg);
+  padding: 0 28px;
+  background: rgba(12, 12, 18, 0.75);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.google-brand {
+.aura-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
-.google-title {
-  font-size: 18px;
-  font-weight: 500;
-  color: var(--g-text-main);
-  letter-spacing: -0.2px;
+.aura-logo-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.2), rgba(177, 156, 217, 0.25));
+  border: 1px solid rgba(0, 242, 254, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px rgba(0, 242, 254, 0.25);
 }
 
-.google-tabs {
+.aura-spark-icon {
+  color: #00f2fe;
+  filter: drop-shadow(0 0 6px rgba(0, 242, 254, 0.8));
+}
+
+.aura-title-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.aura-title {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #FFFFFF;
+}
+
+.aura-title-gradient {
+  background: linear-gradient(135deg, #00f2fe, #B19CD9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.aura-tagline {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #8E8E9F;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+/* Nav Tabs */
+.aura-tabs {
   display: flex;
   gap: 6px;
-  background-color: var(--g-surface);
-  padding: 4px;
-  border-radius: 24px;
-  border: 1px solid var(--g-border);
+  background: rgba(18, 18, 26, 0.8);
+  padding: 5px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
-.google-tab {
+.aura-tab {
   background: transparent;
   border: none;
-  color: var(--g-text-muted);
-  display: flex;
+  color: #8E8E9F;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 20px;
+  gap: 7px;
+  padding: 7px 16px;
+  border-radius: 9999px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.google-tab:hover {
-  color: var(--g-text-main);
-  background-color: rgba(255, 255, 255, 0.05);
+.aura-tab:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.05);
 }
 
-.google-tab.active {
-  background-color: #394457;
-  color: var(--g-blue-light);
+.aura-tab.active.calc {
+  background: rgba(177, 156, 217, 0.2);
+  border: 1px solid rgba(177, 156, 217, 0.4);
+  color: #B19CD9;
+  box-shadow: 0 0 16px rgba(177, 156, 217, 0.25);
+}
+
+.aura-tab.active.notes {
+  background: rgba(0, 242, 254, 0.18);
+  border: 1px solid rgba(0, 242, 254, 0.4);
+  color: #00f2fe;
+  box-shadow: 0 0 16px rgba(0, 242, 254, 0.25);
+}
+
+.aura-tab.active.conv {
+  background: rgba(119, 221, 119, 0.18);
+  border: 1px solid rgba(119, 221, 119, 0.4);
+  color: #77DD77;
+  box-shadow: 0 0 16px rgba(119, 221, 119, 0.25);
 }
 
 /* Main Content Wrapper */
-.google-main-content {
+.aura-main-content {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 30px 16px;
+  padding: 32px 18px;
 }
 
-.google-card-wrapper {
+.aura-card-wrapper {
   width: 100%;
   max-width: 660px;
-  background-color: var(--g-bg);
 }
 
-.google-card-wrapper.notes {
-  max-width: 900px;
-  height: 78vh;
+.aura-card-wrapper.notes {
+  max-width: 980px;
+  height: 82vh;
+}
+
+.aura-card-wrapper.converter {
+  max-width: 680px;
+}
+
+/* Floating Mode Switcher */
+.aura-float-switcher-wrapper {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999;
+}
+
+.aura-float-switcher-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(22, 22, 32, 0.9);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(0, 242, 254, 0.4);
+  color: #00f2fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.7), 0 0 18px rgba(0, 242, 254, 0.3);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.aura-float-switcher-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.8), 0 0 24px rgba(0, 242, 254, 0.5);
+}
+
+.aura-float-switcher-btn.open {
+  transform: rotate(45deg);
+  border-color: #B19CD9;
+  color: #B19CD9;
+}
+
+.aura-float-popover {
+  position: absolute;
+  bottom: 64px;
+  right: 0;
+  width: 310px;
+  background: rgba(18, 18, 26, 0.94);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 10px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8);
+  animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.popover-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #8E8E9F;
+  letter-spacing: 0.8px;
+  padding: 8px 12px 4px;
+}
+
+.popover-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.14s ease;
+}
+
+.popover-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.popover-item.active {
+  background: rgba(0, 242, 254, 0.1);
+  border-color: rgba(0, 242, 254, 0.3);
+}
+
+.popover-icon-box {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.popover-icon-box.calc {
+  background: rgba(177, 156, 217, 0.18);
+  color: #B19CD9;
+}
+
+.popover-icon-box.notes {
+  background: rgba(0, 242, 254, 0.18);
+  color: #00f2fe;
+}
+
+.popover-icon-box.conv {
+  background: rgba(119, 221, 119, 0.18);
+  color: #77DD77;
+}
+
+.popover-item .item-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.popover-item .item-text .name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.popover-item .item-text .desc {
+  font-size: 11px;
+  color: #8E8E9F;
 }
 
 /* Footer */
-.google-footer {
+.aura-footer {
   text-align: center;
-  padding: 12px;
-  font-size: 12px;
-  color: var(--g-text-dim);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-/* ==========================================================================
-   GOOGLE CALCULATOR DISPLAY & KEYPAD
-   ========================================================================== */
-
-.google-calc-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  background-color: var(--g-bg);
-  border: 1px solid var(--g-border);
-  border-radius: 8px;
   padding: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  font-size: 11px;
+  color: #666677;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(10, 10, 15, 0.6);
 }
 
-/* Display Box */
-.google-display-box {
-  background-color: var(--g-bg);
-  border: 1px solid var(--g-border-strong);
-  border-radius: 8px;
-  padding: 12px 16px;
-  min-height: 88px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  text-align: right;
-  overflow: hidden;
-}
-
-.google-display-history {
-  font-size: 15px;
-  color: var(--g-text-muted);
-  min-height: 20px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.google-display-main {
-  font-size: 44px;
-  font-weight: 400;
-  color: #ffffff;
-  line-height: 1.1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  letter-spacing: -0.5px;
-}
-
-.google-display-main.text-small {
-  font-size: 32px;
-}
-
-.google-display-main.text-very-small {
-  font-size: 24px;
-}
-
-/* Mobile Sci Toggle */
-.mobile-sci-toggle {
-  display: none;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 4px;
-}
-
-.google-sci-expand-btn {
-  background: var(--g-surface);
-  border: 1px solid var(--g-border);
-  color: var(--g-blue-light);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  padding: 5px 12px;
-  border-radius: 16px;
-  cursor: pointer;
-}
-
-/* Rad / Deg Pill */
-.rad-deg-pill, .rad-deg-pill-desktop {
+.aura-footer-content {
   display: inline-flex;
   align-items: center;
-  background-color: var(--g-btn-sci);
-  border-radius: 4px;
-  padding: 2px 6px;
-  height: 100%;
-  width: 100%;
-  justify-content: center;
-}
-
-.rad-deg-btn {
-  background: transparent;
-  border: none;
-  color: var(--g-text-muted);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  padding: 2px 6px;
-  transition: color 0.1s ease;
-}
-
-.rad-deg-btn.active {
-  color: #ffffff;
-  font-weight: 700;
-}
-
-.rad-deg-divider {
-  color: var(--g-border-strong);
-  font-size: 12px;
-  margin: 0 2px;
-}
-
-/* Keypad Grid (Desktop 7 Columns) */
-.google-keypad {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
   gap: 8px;
-  width: 100%;
-}
-
-/* Generic Google Keypad Button */
-.g-btn {
-  height: 44px;
-  border: none;
-  border-radius: 4px;
-  font-family: var(--font-family);
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.1s ease, transform 0.05s ease;
-  user-select: none;
-}
-
-.g-btn:active {
-  transform: scale(0.98);
-}
-
-/* Number Buttons */
-.g-btn-num {
-  background-color: var(--g-btn-num);
-  color: #ffffff;
-  font-size: 18px;
-}
-.g-btn-num:hover {
-  background-color: var(--g-btn-num-hover);
-}
-.g-btn-num:active {
-  background-color: var(--g-btn-num-active);
-}
-
-/* Operator Buttons */
-.g-btn-op {
-  background-color: var(--g-btn-op);
-  color: #ffffff;
-  font-size: 18px;
-}
-.g-btn-op:hover {
-  background-color: var(--g-btn-op-hover);
-}
-.g-btn-op:active {
-  background-color: var(--g-btn-op-active);
-}
-
-/* Scientific Function Buttons */
-.g-btn-sci {
-  background-color: var(--g-btn-sci);
-  color: var(--g-text-main);
-  font-size: 14px;
-}
-.g-btn-sci:hover {
-  background-color: var(--g-btn-sci-hover);
-}
-.g-btn-sci:active {
-  background-color: var(--g-btn-sci-active);
-}
-.g-btn-sci.g-btn-active {
-  background-color: #394457;
-  color: var(--g-blue-light);
-}
-
-/* Equals Button (Signature Google Blue) */
-.g-btn-equals {
-  background-color: var(--g-blue);
-  color: #ffffff;
-  font-size: 20px;
+  letter-spacing: 0.5px;
   font-weight: 600;
 }
-.g-btn-equals:hover {
-  background-color: var(--g-blue-hover);
-}
-.g-btn-equals:active {
-  background-color: var(--g-blue-active);
+
+.footer-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #77DD77;
+  box-shadow: 0 0 8px #77DD77;
 }
 
-.key-cell {
+/* ==========================================================================
+   AURA FLUX CONVERTER (MULTI-UNIT & CURRENCY MATRIX)
+   ========================================================================== */
+
+.aura-converter-card {
+  background: rgba(14, 14, 20, 0.78);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 24px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 20px rgba(119, 221, 119, 0.08);
+}
+
+.converter-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.converter-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(119, 221, 119, 0.15);
+  border: 1px solid rgba(119, 221, 119, 0.35);
+  color: #77DD77;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 0 16px rgba(119, 221, 119, 0.2);
 }
 
-/* ==========================================================================
-   MOBILE & TABLET RESPONSIVE RULES FOR CALCULATOR
-   ========================================================================== */
-
-@media (max-width: 620px) {
-  .google-nav-header {
-    padding: 0 12px;
-  }
-  .google-title {
-    display: none;
-  }
-  .google-main-content {
-    padding: 12px 8px;
-  }
-  .google-calc-container {
-    padding: 12px;
-  }
-  .mobile-sci-toggle {
-    display: flex;
-  }
-  
-  /* On mobile: Hide desktop rad/deg cell */
-  .rad-deg-cell {
-    display: none !important;
-  }
-
-  /* When NOT expanded, hide all sci buttons and show clean 4-column keypad */
-  .google-keypad:not(.show-sci-mobile) {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  .google-keypad:not(.show-sci-mobile) .sci-cell {
-    display: none !important;
-  }
-
-  /* When expanded, show 5 or 7 columns scaled smoothly */
-  .google-keypad.show-sci-mobile {
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-  }
-  .google-keypad.show-sci-mobile .g-btn {
-    height: 40px;
-    font-size: 13px;
-  }
-  .google-keypad.show-sci-mobile .g-btn-num,
-  .google-keypad.show-sci-mobile .g-btn-op {
-    font-size: 15px;
-  }
+.converter-title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: #ffffff;
 }
 
-/* ==========================================================================
-   GOOGLE UNIT CONVERTER
-   ========================================================================== */
-
-.google-converter-card {
-  background-color: var(--g-bg);
-  border: 1px solid var(--g-border);
-  border-radius: 8px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+.converter-desc {
+  font-size: 12px;
+  color: var(--aura-text-muted);
 }
 
-.google-category-chips {
+.aura-category-chips {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
 }
 
-.google-category-chips::-webkit-scrollbar {
+.aura-category-chips::-webkit-scrollbar {
   height: 4px;
 }
-.google-category-chips::-webkit-scrollbar-thumb {
-  background: var(--g-border);
+
+.aura-category-chips::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 4px;
 }
 
-.google-chip {
-  background-color: var(--g-surface);
-  border: 1px solid var(--g-border);
-  color: var(--g-text-muted);
-  padding: 6px 14px;
-  border-radius: 16px;
+.aura-chip {
+  background: rgba(25, 25, 36, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--aura-text-muted);
+  padding: 8px 16px;
+  border-radius: 9999px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.google-chip:hover {
-  color: var(--g-text-main);
-  background-color: rgba(255, 255, 255, 0.08);
+.aura-chip:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
-.google-chip.active {
-  background-color: #394457;
-  border-color: var(--g-blue-light);
-  color: var(--g-blue-light);
+.aura-chip.active {
+  background: rgba(119, 221, 119, 0.2);
+  border-color: rgba(119, 221, 119, 0.5);
+  color: #77DD77;
+  box-shadow: 0 0 14px rgba(119, 221, 119, 0.25);
 }
 
 .converter-boxes-row {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
-.google-unit-card {
-  background-color: var(--g-bg);
-  border: 1px solid var(--g-border-strong);
-  border-radius: 8px;
-  padding: 12px;
+.aura-unit-card {
+  background: rgba(18, 18, 26, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.aura-unit-card:focus-within {
+  border-color: rgba(119, 221, 119, 0.45);
+  box-shadow: 0 0 16px rgba(119, 221, 119, 0.15);
 }
 
 .unit-card-label {
-  font-size: 12px;
-  color: var(--g-text-dim);
+  font-size: 11px;
+  color: var(--aura-text-dim);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  font-weight: 700;
 }
 
-.google-select {
-  background: transparent;
-  border: none;
-  color: var(--g-blue-light);
-  font-size: 15px;
-  font-weight: 500;
+.aura-select {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #77DD77;
+  font-size: 14px;
+  font-weight: 600;
   outline: none;
   cursor: pointer;
-  padding: 2px 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  transition: all 0.15s ease;
 }
 
-.google-select option {
-  background-color: var(--g-surface);
-  color: var(--g-text-main);
+.aura-select:focus {
+  border-color: rgba(119, 221, 119, 0.5);
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.google-unit-input {
+.aura-select option {
+  background-color: #12121a;
+  color: #ffffff;
+}
+
+.aura-unit-input {
   background: transparent;
   border: none;
   color: #ffffff;
-  font-size: 32px;
+  font-size: 34px;
+  font-weight: 800;
   font-family: var(--font-family);
   outline: none;
   width: 100%;
+  letter-spacing: -0.5px;
 }
 
-.google-swap-btn {
-  background-color: var(--g-surface);
-  border: 1px solid var(--g-border);
-  color: var(--g-text-muted);
-  width: 38px;
-  height: 38px;
+.aura-swap-btn {
+  background: rgba(28, 28, 40, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--aura-text-muted);
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.google-swap-btn:hover {
-  color: #ffffff;
-  background-color: var(--g-border);
+.aura-swap-btn:hover {
+  color: #77DD77;
+  border-color: rgba(119, 221, 119, 0.4);
+  background: rgba(119, 221, 119, 0.15);
+  transform: rotate(180deg) scale(1.06);
+  box-shadow: 0 0 16px rgba(119, 221, 119, 0.25);
 }
 
 .converter-summary {
-  font-size: 14px;
-  color: var(--g-text-muted);
+  font-size: 13.5px;
+  color: var(--aura-text-muted);
   text-align: center;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-weight: 500;
 }
 
-@media (max-width: 500px) {
+@media (max-width: 580px) {
   .converter-boxes-row {
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 10px;
   }
-  .google-swap-btn {
-    margin: 0 auto;
+  .aura-swap-btn {
+    margin: 4px auto;
   }
-}
-
-/* ==========================================================================
-   GOOGLE MATH NOTES
-   ========================================================================== */
-
-.math-notes-google {
-  width: 100%;
-  height: 100%;
-  min-height: 520px;
-  position: relative;
-  background-color: var(--g-bg);
-  border: 1px solid var(--g-border);
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-}
-
-.notes-header-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--g-border);
-  background-color: var(--g-surface);
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.notes-header-left {
-  display: flex;
-  flex-direction: column;
-}
-
-.google-notes-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: #ffffff;
-}
-
-.google-notes-subtitle {
-  font-size: 12px;
-  color: var(--g-text-muted);
-}
-
-.notes-header-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.google-chip-btn {
-  background-color: var(--g-bg);
-  border: 1px solid var(--g-border);
-  color: var(--g-text-muted);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 16px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.google-chip-btn:hover {
-  color: var(--g-text-main);
-}
-
-.google-chip-btn.active {
-  background-color: #394457;
-  border-color: var(--g-blue-light);
-  color: var(--g-blue-light);
-}
-
-.google-icon-btn {
-  background: transparent;
-  border: 1px solid var(--g-border);
-  color: var(--g-text-main);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 16px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.google-icon-btn:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-}
-
-.google-btn-primary {
-  background-color: var(--g-blue);
-  border: none;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 16px;
-  border-radius: 16px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.google-btn-primary:hover:not(:disabled) {
-  background-color: var(--g-blue-hover);
-}
-
-.google-btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.notes-status-chip {
-  position: absolute;
-  top: 60px;
-  left: 16px;
-  z-index: 15;
-  background-color: var(--g-surface);
-  border: 1px solid var(--g-border);
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  color: var(--g-blue-light);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
-
-.notes-spinner {
-  width: 10px;
-  height: 10px;
-  border: 2px solid var(--g-blue-light);
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.canvas-container {
-  flex: 1;
-  position: relative;
-  background-color: var(--g-bg);
-  cursor: crosshair;
-}
-
-.canvas-container::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-size: 24px 24px;
-  background-image: 
-    radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-  pointer-events: none;
-}
-
-.notes-canvas {
-  width: 100% !important;
-  height: 100% !important;
-  display: block;
-}
-
-.display-mode-selector {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background-color: var(--g-bg);
-  padding: 2px 4px 2px 8px;
-  border-radius: 16px;
-  border: 1px solid var(--g-border);
-}
-
-.mode-label {
-  font-size: 11px;
-  color: var(--g-text-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.mode-pill-toggle {
-  display: flex;
-  gap: 2px;
-  background-color: var(--g-surface);
-  border-radius: 12px;
-  padding: 1px;
-}
-
-.mode-pill-btn {
-  background: transparent;
-  border: none;
-  color: var(--g-text-muted);
-  font-size: 12px;
-  font-weight: 500;
-  padding: 3px 10px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.mode-pill-btn:hover {
-  color: #ffffff;
-}
-
-.mode-pill-btn.active {
-  background-color: #394457;
-  color: var(--g-blue-light);
-  font-weight: 600;
-}
-
-/* ==========================================================================
-   INLINE MATH RESULTS (BASELINE & HORIZONTAL FLOW ALIGNMENT)
-   ========================================================================== */
-
-.inline-math-result {
-  position: absolute;
-  z-index: 15;
-  display: inline-flex;
-  align-items: baseline;
-  user-select: none;
-  pointer-events: auto;
-  line-height: 1;
-  animation: popInline 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-@keyframes popInline {
-  from {
-    opacity: 0;
-    transform: scale(0.8) translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.handwritten-replica {
-  font-family: 'Caveat', 'Google Sans', cursive, sans-serif;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  display: inline-flex;
-  align-items: baseline;
-  padding: 2px 6px;
-  border-radius: 6px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-}
-
-.handwritten-replica.num-val {
-  color: var(--g-blue-light);
-  background-color: rgba(138, 180, 248, 0.12);
-}
-
-.handwritten-replica.bool-true {
-  color: #81c995; /* Google Green */
-  background-color: rgba(129, 201, 149, 0.15);
-}
-
-.handwritten-replica.bool-false {
-  color: #f28b82; /* Google Red */
-  background-color: rgba(242, 139, 130, 0.15);
-}
-
-/* Margin Wrapping Sub-Line Style */
-.inline-math-result.wrapped-subline {
-  border-left: 2px solid var(--g-blue-light);
-  padding-left: 6px;
-}
-
-.indent-arrow {
-  color: var(--g-blue-light);
-  font-size: 0.8em;
-  margin-right: 4px;
-  opacity: 0.8;
-}
-
-.inline-remove-btn {
-  background: transparent;
-  border: none;
-  color: var(--g-text-dim);
-  cursor: pointer;
-  padding: 2px;
-  margin-left: 4px;
-  border-radius: 50%;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.15s ease;
-}
-
-.inline-math-result:hover .inline-remove-btn {
-  display: inline-flex;
-}
-
-.inline-remove-btn:hover {
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* ==========================================================================
-   SUGGEST RESULTS ACTION PILL
-   ========================================================================== */
-
-.suggest-action-pill {
-  position: absolute;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  background-color: var(--g-surface);
-  border: 1px solid var(--g-blue-light);
-  border-radius: 20px;
-  padding: 2px 4px 2px 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-  animation: pulsePill 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-@keyframes pulsePill {
-  from { opacity: 0; transform: scale(0.7); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-.suggest-solve-btn {
-  background: transparent;
-  border: none;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 4px 6px;
-}
-
-.suggest-dot {
-  width: 7px;
-  height: 7px;
-  background-color: var(--g-blue-light);
-  border-radius: 50%;
-  animation: blink 1.2s infinite ease-in-out;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.8); }
-}
-
-.suggest-label {
-  color: var(--g-text-muted);
-  font-size: 12px;
-}
-
-.suggest-value {
-  font-weight: 700;
-  color: var(--g-blue-light);
-}
-
-.suggest-value.text-true {
-  color: #81c995;
-}
-
-.suggest-value.text-false {
-  color: #f28b82;
-}
-
-.suggest-dismiss-btn {
-  background: transparent;
-  border: none;
-  color: var(--g-text-muted);
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.suggest-dismiss-btn:hover {
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Floating Graph Card */
-.google-graph-card {
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
-  z-index: 20;
-  width: 360px;
-  background-color: var(--g-surface);
-  border: 1px solid var(--g-border-strong);
-  border-radius: 8px;
-  padding: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
-}
-
-.graph-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.graph-title {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--g-blue-light);
-}
-
-.graph-body {
-  width: 100%;
-}
-
-/* ==========================================================================
-   APPLE IPADOS MATH NOTES & STATEFUL COMPUTATIONAL ENGINE
-   ========================================================================== */
-
-.google-card-wrapper.notes {
-  max-width: 1150px;
-  width: 100%;
-  height: 84vh;
-  min-height: 600px;
 }
 
 .apple-math-notes-root {
@@ -2488,7 +2062,7 @@ body, html {
    GEN Z ULTRA-MODERN AESTHETIC CALCULATOR (aura.calc)
    ========================================================================== */
 
-.google-card-wrapper.genz {
+.aura-card-wrapper.genz {
   max-width: 980px;
   width: 100%;
   display: flex;
@@ -3396,7 +2970,7 @@ body, html {
 /* Mobile Viewport (< 640px): Thumb-friendly floating bottom-sheet */
 @media (max-width: 640px) {
   /* Navigation Bar on Mobile */
-  .google-nav-header {
+  .aura-nav-header {
     height: auto;
     padding: 10px 14px;
     flex-direction: column;
@@ -3408,18 +2982,18 @@ body, html {
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
-  .google-brand {
+  .aura-brand {
     justify-content: space-between;
     width: 100%;
   }
 
-  .google-title {
+  .aura-title {
     font-size: 15px;
     font-weight: 700;
     letter-spacing: -0.3px;
   }
 
-  .google-tabs {
+  .aura-tabs {
     width: 100%;
     overflow-x: auto;
     scrollbar-width: none;
@@ -3431,11 +3005,11 @@ body, html {
     -webkit-overflow-scrolling: touch;
   }
 
-  .google-tabs::-webkit-scrollbar {
+  .aura-tabs::-webkit-scrollbar {
     display: none;
   }
 
-  .google-tab {
+  .aura-tab {
     padding: 6px 12px;
     font-size: 11.5px;
     font-weight: 600;
@@ -3443,7 +3017,7 @@ body, html {
     flex-shrink: 0;
   }
 
-  .google-main-content {
+  .aura-main-content {
     padding: 6px 4px 60px 4px;
   }
 

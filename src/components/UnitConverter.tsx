@@ -88,13 +88,21 @@ const UnitConverter = () => {
   };
 
   return (
-    <div className="google-converter-card">
+    <div className="aura-converter-card">
+      <div className="aura-converter-header">
+        <div className="aura-converter-badge">
+          <ArrowLeftRight size={16} color="#00f2fe" />
+          <span>FLUX CONVERTER</span>
+        </div>
+        <span className="aura-converter-sub">Precision Multi-Unit & Currency Engine</span>
+      </div>
+
       {/* Category Tabs */}
-      <div className="google-category-chips">
+      <div className="aura-category-chips">
         {(Object.keys(conversionCategories) as Category[]).map(c => (
           <button
             key={c}
-            className={`google-chip ${category === c ? 'active' : ''}`}
+            className={`aura-chip ${category === c ? 'active' : ''}`}
             onClick={() => handleCategoryChange(c)}
           >
             {c}
@@ -103,12 +111,12 @@ const UnitConverter = () => {
       </div>
 
       {/* Main Conversion Grid */}
-      <div className="converter-boxes-row">
+      <div className="aura-converter-boxes-row">
         {/* From Box */}
-        <div className="google-unit-card">
-          <div className="unit-card-label">From</div>
+        <div className="aura-unit-card">
+          <div className="aura-unit-card-label">FROM</div>
           <select 
-            className="google-select" 
+            className="aura-select" 
             value={fromUnit} 
             onChange={(e) => {
               setFromUnit(e.target.value);
@@ -121,7 +129,7 @@ const UnitConverter = () => {
           </select>
           <input 
             type="number" 
-            className="google-unit-input" 
+            className="aura-unit-input" 
             value={fromVal} 
             onChange={handleFromChange}
             placeholder="0"
@@ -129,15 +137,15 @@ const UnitConverter = () => {
         </div>
 
         {/* Swap button */}
-        <button className="google-swap-btn" onClick={swapUnits} title="Swap units">
+        <button className="aura-swap-btn" onClick={swapUnits} title="Swap units">
           <ArrowLeftRight size={18} />
         </button>
 
         {/* To Box */}
-        <div className="google-unit-card">
-          <div className="unit-card-label">To</div>
+        <div className="aura-unit-card">
+          <div className="aura-unit-card-label">TO</div>
           <select 
-            className="google-select" 
+            className="aura-select" 
             value={toUnit} 
             onChange={(e) => {
               setToUnit(e.target.value);
@@ -150,7 +158,7 @@ const UnitConverter = () => {
           </select>
           <input 
             type="number" 
-            className="google-unit-input" 
+            className="aura-unit-input" 
             value={toVal} 
             onChange={handleToChange}
             placeholder="0"
@@ -159,8 +167,8 @@ const UnitConverter = () => {
       </div>
 
       {/* Summary Formula */}
-      <div className="converter-summary">
-        1 {fromUnit} = {convert('1', fromUnit, toUnit, category)} {toUnit}
+      <div className="aura-converter-summary">
+        <span className="summary-accent">1 {fromUnit}</span> = <span className="summary-val">{convert('1', fromUnit, toUnit, category)} {toUnit}</span>
       </div>
     </div>
   );
