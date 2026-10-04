@@ -116,6 +116,79 @@ export const AppleMathNotes: React.FC = () => {
   const [isSolving, setIsSolving] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
   const [activePenColor, setActivePenColor] = useState('#00f2fe'); // Futuristic Electric Cyan
+  const solveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Synchronize canvas coordinate resolution with its DOM container
+  useEffect(() => {
+    if (mode !== 'draw') return;
+
+    const resizeCanvas = () => {
+      const pad = sigPadRef.current;
+      const container = canvasContainerRef.current;
+      if (!pad || !container) return;
+
+      const canvas = pad.getCanvas();
+      if (!canvas) return;
+
+      const rect = container.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      const targetWidth = Math.round(rect.width * ratio);
+      const targetHeight = Math.round(rect.height * ratio);
+
+      // Only resize if the internal resolution doesn't match the container dimensions
+      if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+        let savedData: any = null;
+        try {
+          if (!pad.isEmpty()) {
+            savedData = pad.toData();
+          }
+        } catch {
+          // ignore
+        }
+
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        canvas.style.width = `${rect.width}px`;
+        canvas.style.height = `${rect.height}px`;
+
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.scale(ratio, ratio);
+        }
+
+        if (savedData && savedData.length > 0) {
+          try {
+            pad.fromData(savedData);
+          } catch {
+            // ignore
+          }
+        }
+      }
+    };
+
+    // Immediate invocation and schedule next ticks for DOM rendering
+    resizeCanvas();
+    const rafId = requestAnimationFrame(resizeCanvas);
+    const timerId = setTimeout(resizeCanvas, 60);
+
+    const ro = new ResizeObserver(() => {
+      resizeCanvas();
+    });
+
+    if (canvasContainerRef.current) {
+      ro.observe(canvasContainerRef.current);
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(timerId);
+      ro.disconnect();
+      window.removeEventListener('resize', resizeCanvas);
+    };
+  }, [mode]);
 
   // Live Reactive Evaluation Engine for Lines
   useEffect(() => {
@@ -346,9 +419,29 @@ For each expression, return raw JSON array:
     }
 
     if (results && Array.isArray(results) && results.length > 0) {
+      // Calculate rightmost stroke point from user's actual drawing
+      let maxX = 0;
+      let lastY = 0;
+      try {
+        const strokeData = sigPadRef.current.toData();
+        for (const group of strokeData) {
+          for (const pt of group) {
+            if (pt.x > maxX) {
+              maxX = pt.x;
+              lastY = pt.y;
+            }
+          }
+        }
+      } catch {
+        // ignore
+      }
+
       const items: HandwrittenItem[] = results.map((item, idx) => {
-        const x = item.equals_x_percent ? (item.equals_x_percent / 100) * containerW : containerW * 0.55;
-        const y = item.equals_y_percent ? (item.equals_y_percent / 100) * containerH : containerH * 0.35;
+        const defaultX = maxX > 0 ? Math.min(maxX + 14, containerW - 140) : (containerW * 0.55);
+        const defaultY = lastY > 0 ? lastY : (containerH * 0.35);
+
+        const x = item.equals_x_percent ? (item.equals_x_percent / 100) * containerW : defaultX;
+        const y = item.equals_y_percent ? (item.equals_y_percent / 100) * containerH : defaultY;
         const boxH = item.height_percent ? (item.height_percent / 100) * containerH : 38;
         return {
           id: `hw-${idx}-${Date.now()}`,
@@ -367,7 +460,24 @@ For each expression, return raw JSON array:
     setIsSolving(false);
   };
 
+  const undoDrawStroke = () => {
+    if (!sigPadRef.current) return;
+    try {
+      const data = sigPadRef.current.toData();
+      if (data && data.length > 0) {
+        data.pop();
+        sigPadRef.current.fromData(data);
+        if (data.length === 0) {
+          setHandwrittenItems([]);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   const clearDrawCanvas = () => {
+    if (solveTimeoutRef.current) clearTimeout(solveTimeoutRef.current);
     sigPadRef.current?.clear();
     setHandwrittenItems([]);
     setStatusMessage('');
@@ -575,11 +685,12 @@ For each expression, return raw JSON array:
             <SignatureCanvas 
               ref={sigPadRef}
               penColor={activePenColor}
-              minWidth={2.2}
-              maxWidth={4.2}
+              minWidth={2.5}
+              maxWidth={4.8}
               velocityFilterWeight={0.7}
               onEnd={() => {
-                setTimeout(solveHandwriting, 1500);
+                if (solveTimeoutRef.current) clearTimeout(solveTimeoutRef.current);
+                solveTimeoutRef.current = setTimeout(solveHandwriting, 1800);
               }}
               canvasProps={{ className: 'f-neural-canvas' }}
             />
@@ -621,6 +732,7 @@ For each expression, return raw JSON array:
                     className={`f-color-dot ${activePenColor === c ? 'active' : ''}`}
                     style={{ backgroundColor: c, boxShadow: activePenColor === c ? `0 0 12px ${c}` : 'none' }}
                     onClick={() => setActivePenColor(c)}
+                    title={`Select Color ${c}`}
                   />
                 ))}
               </div>
@@ -633,9 +745,14 @@ For each expression, return raw JSON array:
                 <span>Pencil Demo</span>
               </button>
 
+              {/* Undo Last Stroke */}
+              <button className="f-dock-icon-btn" onClick={undoDrawStroke} title="Undo Last Stroke">
+                <RotateCcw size={14} />
+              </button>
+
               {/* Clear Canvas */}
               <button className="f-dock-icon-btn" onClick={clearDrawCanvas} title="Clear Canvas">
-                <RotateCcw size={14} />
+                <Trash2 size={14} />
               </button>
 
               {/* Instant Solve Button */}

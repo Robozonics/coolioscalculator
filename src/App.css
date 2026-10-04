@@ -3998,6 +3998,10 @@ body, html {
   height: 100%;
   position: relative;
   background: radial-gradient(circle at center, #111118 0%, #0B0B0F 100%);
+  touch-action: none !important;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
 }
 
 .f-canvas-status-pill {
@@ -4016,12 +4020,15 @@ body, html {
   font-weight: 600;
   padding: 4px 12px;
   border-radius: 9999px;
+  pointer-events: none;
 }
 
 .f-neural-canvas {
-  width: 100% !important;
-  height: 100% !important;
+  width: 100%;
+  height: 100%;
   cursor: crosshair;
+  touch-action: none !important;
+  display: block;
 }
 
 /* Holographic Handwritten Result Anchor */
