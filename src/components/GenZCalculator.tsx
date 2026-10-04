@@ -177,6 +177,12 @@ export const GenZCalculator: React.FC = () => {
     }
 
     // Normal character append
+    if (['+', '−', '×', '÷', '^'].includes(val)) {
+      setVibeStatus("cookin' up 🍳");
+    } else if (vibeStatus.includes('fresh') || vibeStatus.includes('clean') || vibeStatus.includes('served')) {
+      setVibeStatus("all vibes immaculate ✨");
+    }
+
     setDisplay(prev => {
       if (prev === '0' && !['.', '+', '−', '×', '÷', '^', '%'].includes(val)) {
         return val;
@@ -347,6 +353,8 @@ export const GenZCalculator: React.FC = () => {
 
       {/* Main Glassmorphic Calculator Card */}
       <div className="genz-glass-card">
+        {/* Mobile Sheet Drag Indicator */}
+        <div className="mobile-sheet-pill-handle" aria-hidden="true" />
         
         {/* Card Header Bar */}
         <header className="genz-card-header">
@@ -561,8 +569,15 @@ export const GenZCalculator: React.FC = () => {
 
       {/* Slide-in Modular Side Panel (Tablet & Desktop Drawer for History & Converter) */}
       {isSidePanelOpen && (
-        <aside className="genz-side-panel">
-          <div className="side-panel-header">
+        <>
+          <div 
+            className="genz-side-backdrop" 
+            onClick={() => setIsSidePanelOpen(false)}
+            aria-label="Close drawer"
+          />
+          <aside className="genz-side-panel">
+            <div className="mobile-sheet-pill-handle" aria-hidden="true" />
+            <div className="side-panel-header">
             <div className="panel-tab-pills">
               <button 
                 className={`panel-tab ${sidePanelTab === 'history' ? 'active' : ''}`}
@@ -752,7 +767,8 @@ export const GenZCalculator: React.FC = () => {
             )}
           </div>
         </aside>
-      )}
+      </>
+    )}
     </div>
   );
 };

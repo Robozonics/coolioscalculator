@@ -3358,53 +3358,219 @@ body, html {
    VIEWPORT RESPONSIVENESS (Mobile, Tablet, Desktop)
    ========================================================================== */
 
+/* Mobile Drag Handles & Backdrop Overlay */
+.mobile-sheet-pill-handle {
+  display: none;
+  width: 40px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 2px;
+  margin: 0 auto 10px auto;
+  transition: background-color 0.15s ease;
+}
+
+.genz-side-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 55;
+  animation: fadeIn 0.18s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUpSheet {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* ==========================================================================
+   VIEWPORT RESPONSIVENESS (Mobile, Tablet, Desktop)
+   ========================================================================== */
+
 /* Mobile Viewport (< 640px): Thumb-friendly floating bottom-sheet */
 @media (max-width: 640px) {
+  /* Navigation Bar on Mobile */
+  .google-nav-header {
+    height: auto;
+    padding: 10px 14px;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+    background: rgba(14, 14, 18, 0.94);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .google-brand {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .google-title {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .google-tabs {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 3px;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .google-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .google-tab {
+    padding: 6px 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .google-main-content {
+    padding: 6px 4px 60px 4px;
+  }
+
+  /* Gen Z Calculator Page on Mobile */
   .genz-calc-page {
-    padding: 8px;
-    min-height: calc(100vh - 120px);
-    border-radius: 0;
+    padding: 6px 4px;
+    min-height: calc(100vh - 140px);
+    border-radius: 20px;
     align-items: flex-end;
+  }
+
+  .mobile-sheet-pill-handle {
+    display: block;
   }
 
   .genz-glass-card {
     max-width: 100%;
-    border-radius: 28px 28px 16px 16px;
-    padding: 16px 14px;
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
+    width: 100%;
+    border-radius: 28px;
+    padding: 16px 14px 18px 14px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
+    margin: 0 auto;
   }
 
-  .pill-btn {
-    height: 52px;
-    font-size: 20px;
+  .genz-display-wrapper {
+    min-height: 90px;
+    padding: 10px 12px;
   }
 
-  .pill-btn.btn-num {
-    font-size: 22px;
+  .display-main-digits {
+    font-size: clamp(34px, 9vw, 50px);
+    letter-spacing: -1px;
   }
 
   .keypad-primary-grid {
     gap: 8px;
   }
 
+  .pill-btn {
+    height: 56px; /* Oversized thumb-friendly hit target */
+    font-size: 20px;
+    border-radius: 9999px;
+  }
+
+  .pill-btn.btn-num {
+    font-size: 22px;
+  }
+
   .desktop-only {
     display: none !important;
   }
 
+  /* Side Panel Drawer as Mobile Bottom Sheet */
   .genz-side-panel {
-    top: 0;
+    top: auto;
     bottom: 0;
     right: 0;
     left: 0;
     width: 100%;
-    border-radius: 24px 24px 0 0;
+    max-height: 82vh;
+    border-radius: 28px 28px 0 0;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.7);
+    animation: slideUpSheet 0.24s cubic-bezier(0.175, 0.885, 0.32, 1.15);
+  }
+
+  /* iPadOS Switcher on Mobile */
+  .ipados-float-switcher-wrapper {
+    bottom: 12px;
+    left: 12px;
+    z-index: 70;
+  }
+
+  .ipados-float-switcher-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  /* Apple Math Notes Mobile Refinements */
+  .apple-math-notes-root {
+    border-radius: 18px;
+  }
+
+  .apple-notes-header {
+    height: auto;
+    padding: 8px 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .apple-workspace.split {
+    flex-direction: column;
+  }
+
+  .floating-pencil-kit {
+    bottom: 10px;
+    padding: 6px 10px;
+    max-width: 95%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    gap: 6px;
+  }
+
+  .floating-pencil-kit::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tool-item span,
+  .kit-demo-btn span,
+  .kit-solve-btn span {
+    display: none;
+  }
+
+  .tool-item,
+  .kit-demo-btn,
+  .kit-solve-btn {
+    padding: 6px 8px;
   }
 }
 
 /* Tablet Viewport (641px - 1024px): Centered modular card */
 @media (min-width: 641px) and (max-width: 1024px) {
   .genz-glass-card {
-    max-width: 380px;
+    max-width: 390px;
+  }
+
+  .pill-btn {
+    height: 56px;
   }
 }
 
