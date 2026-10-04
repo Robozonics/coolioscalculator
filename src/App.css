@@ -2277,4 +2277,211 @@ body, html {
   to { opacity: 1; transform: scale(1); }
 }
 
+/* ==========================================================================
+   TUTORIAL PRESETS & SCENARIO SELECTOR BAR
+   ========================================================================== */
+
+.stream-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.stream-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stream-badge {
+  font-size: 11px;
+  color: #8e8e93;
+  background-color: #2c2c2e;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+.preset-scenarios-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  overflow-x: auto;
+}
+
+.preset-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #ff9f0a;
+  white-space: nowrap;
+  margin-right: 2px;
+}
+
+.preset-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #2c2c2e;
+  color: #e5e5ea;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.preset-pill:hover {
+  background-color: #3a3a3c;
+  border-color: rgba(255, 159, 10, 0.4);
+  color: #ffffff;
+}
+
+.preset-pill.active {
+  background-color: rgba(255, 159, 10, 0.18);
+  border-color: #ff9f0a;
+  color: #ff9f0a;
+  font-weight: 600;
+}
+
+.preset-icon {
+  font-size: 12px;
+}
+
+/* Pencil Demo Button in Floating Toolkit */
+.kit-demo-btn {
+  background: rgba(255, 159, 10, 0.15);
+  border: 1px solid rgba(255, 159, 10, 0.4);
+  color: #ff9f0a;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 14px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.kit-demo-btn:hover {
+  background: rgba(255, 159, 10, 0.28);
+  border-color: #ff9f0a;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   IPADOS FLOATING CALCULATOR MODE SWITCHER
+   ========================================================================== */
+
+.ipados-float-switcher-wrapper {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 999;
+}
+
+.ipados-float-switcher-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(44, 44, 46, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ff9f0a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.ipados-float-switcher-btn:hover {
+  transform: scale(1.08);
+  background-color: #3a3a3c;
+  color: #ffffff;
+  border-color: #ff9f0a;
+}
+
+.ipados-float-switcher-btn.open {
+  background: #ff9f0a;
+  color: #1c1c1e;
+  border-color: #ff9f0a;
+}
+
+.ipados-float-popover {
+  position: absolute;
+  bottom: 56px;
+  left: 0;
+  width: 250px;
+  background: rgba(44, 44, 46, 0.94);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: popIn 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.popover-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #8e8e93;
+  padding: 6px 8px 4px;
+}
+
+.popover-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.12s ease;
+}
+
+.popover-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.popover-item.active {
+  background-color: rgba(255, 159, 10, 0.15);
+}
+
+.popover-item .item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.popover-item .name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.popover-item .desc {
+  font-size: 10.5px;
+  color: #8e8e93;
+}
+
 

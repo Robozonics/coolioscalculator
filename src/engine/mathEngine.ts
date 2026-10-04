@@ -78,6 +78,14 @@ export class MathEngine {
     return new Map(this.symbolTable);
   }
 
+  public getScope(): Record<string, any> {
+    const scope: Record<string, any> = {};
+    for (const [k, v] of this.symbolTable.entries()) {
+      scope[k] = v.value;
+    }
+    return scope;
+  }
+
   // Pre-process implicit multiplication: e.g. "4x" -> "4 * x", "2pi" -> "2 * pi", "3(x+1)" -> "3 * (x+1)"
   public normalizeExpression(expr: string): string {
     let s = expr.trim();
@@ -146,6 +154,43 @@ export class MathEngine {
     let clean = line.trim();
     if (!clean) {
       return { raw: line, evaluated: '', isAssignment: false, dependencies: [] };
+    }
+
+    const scope = this.getScope();
+
+    // Check for vertical column arithmetic:
+    // e.g. "120\n+ 350\n---" or "150\n230\n───"
+    if (line.includes('\n') && (line.includes('-') || line.includes('─') || line.includes('='))) {
+      const sublines = line.split('\n').map(l => l.trim()).filter(Boolean);
+      const lastLine = sublines[sublines.length - 1];
+      if (/^[-─=_]{2,}$/.test(lastLine)) {
+        const operandLines = sublines.slice(0, sublines.length - 1);
+        let sum = 0;
+        let valid = true;
+        for (const opLine of operandLines) {
+          try {
+            const normalized = this.normalizeExpression(opLine.replace(/^[+]/, ''));
+            const val = math.evaluate(normalized, scope);
+            if (typeof val === 'number') {
+              sum += val;
+            } else {
+              valid = false;
+              break;
+            }
+          } catch {
+            valid = false;
+            break;
+          }
+        }
+        if (valid && operandLines.length > 0) {
+          return {
+            raw: line,
+            evaluated: String(sum),
+            isAssignment: false,
+            dependencies: []
+          };
+        }
+      }
     }
 
     // Strip trailing equals if present
@@ -233,22 +278,24 @@ export class MathEngine {
 
     // Check for equality or inequality logic: e.g. "7=9", "5 > 3", "x in {1,2,3}"
     if (!isAssignment && (clean.includes('==') || clean.includes('!=') || clean.includes('>') || clean.includes('<') || clean.includes(' in '))) {
-      return this.evaluateLogic(clean);
+      return this.evaluateLogic(clean, scope);
     }
 
-    // Check if it's a single equality test like "7 = 9"
-    const singleEqualsLogic = clean.match(/^([0-9.\s+\-*/()]+)\s*=\s*([0-9.\s+\-*/()]+)$/);
+    // Check if it's a single equality test like "7 = 9" or "x + 2 = 12"
+    const singleEqualsLogic = clean.match(/^(.+?)\s*=\s*(.+)$/);
     if (singleEqualsLogic && !isAssignment) {
       try {
-        const leftVal = math.evaluate(this.normalizeExpression(singleEqualsLogic[1]));
-        const rightVal = math.evaluate(this.normalizeExpression(singleEqualsLogic[2]));
-        const isEqual = Math.abs(leftVal - rightVal) < 1e-9;
-        return {
-          raw: line,
-          evaluated: isEqual ? 'true' : 'false',
-          isAssignment: false,
-          dependencies: []
-        };
+        const leftVal = math.evaluate(this.normalizeExpression(singleEqualsLogic[1]), scope);
+        const rightVal = math.evaluate(this.normalizeExpression(singleEqualsLogic[2]), scope);
+        if (typeof leftVal === 'number' && typeof rightVal === 'number') {
+          const isEqual = Math.abs(leftVal - rightVal) < 1e-9;
+          return {
+            raw: line,
+            evaluated: isEqual ? 'true' : 'false',
+            isAssignment: false,
+            dependencies: this.extractVariables(clean).filter(v => v !== 'pi' && v !== 'e')
+          };
+        }
       } catch {
         // Continue standard evaluation
       }
@@ -274,11 +321,6 @@ export class MathEngine {
     }
 
     // Check for undefined variables
-    const scope: Record<string, any> = {};
-    for (const [k, v] of this.symbolTable.entries()) {
-      scope[k] = v.value;
-    }
-
     for (const d of deps) {
       if (!(d in scope)) {
         return {
@@ -377,30 +419,30 @@ export class MathEngine {
   }
 
   // Evaluate logic expressions (inequalities, set membership)
-  private evaluateLogic(expr: string): EvaluationResult {
+  private evaluateLogic(expr: string, scope: Record<string, any> = {}): EvaluationResult {
     try {
       // Set membership: e.g. "x in {1, 2, 3}"
       const inMatch = expr.match(/^(.+?)\s+in\s+\{(.+?)\}$/);
       if (inMatch) {
-        const itemVal = math.evaluate(this.normalizeExpression(inMatch[1]));
-        const setVals = inMatch[2].split(',').map(s => math.evaluate(this.normalizeExpression(s.trim())));
+        const itemVal = math.evaluate(this.normalizeExpression(inMatch[1]), scope);
+        const setVals = inMatch[2].split(',').map(s => math.evaluate(this.normalizeExpression(s.trim()), scope));
         const has = setVals.some(v => Math.abs(v - itemVal) < 1e-9);
         return {
           raw: expr,
           evaluated: has ? 'true' : 'false',
           isAssignment: false,
-          dependencies: []
+          dependencies: this.extractVariables(expr).filter(v => v !== 'pi' && v !== 'e')
         };
       }
 
       // Standard logical comparison
       const normalized = expr.replace(/==/g, '==').replace(/!=/g, '!=');
-      const res = math.evaluate(normalized);
+      const res = math.evaluate(normalized, scope);
       return {
         raw: expr,
         evaluated: Boolean(res) ? 'true' : 'false',
         isAssignment: false,
-        dependencies: []
+        dependencies: this.extractVariables(expr).filter(v => v !== 'pi' && v !== 'e')
       };
     } catch {
       return {

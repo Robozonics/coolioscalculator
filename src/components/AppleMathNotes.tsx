@@ -58,24 +58,74 @@ type DisplayMode = 'insert' | 'suggest';
 type PaperStyle = 'grid' | 'lined' | 'blank';
 type ToolType = 'pen' | 'highlighter' | 'pencil' | 'eraser';
 
-const DEFAULT_DOC_BLOCKS: DocumentBlock[] = [
-  { id: 'b1', type: 'heading', headingLevel: 1, content: 'Physics & Engineering Notes' },
-  { id: 'b2', type: 'text', content: 'Define variables and watch downstream formulas update live via the interactive value scrubber:' },
-  { id: 'b3', type: 'math', content: 'mass = 12.5' },
-  { id: 'b4', type: 'math', content: 'velocity = 4.2' },
-  { id: 'b5', type: 'math', content: 'kineticEnergy = 0.5 * mass * velocity^2 =' },
-  { id: 'b6', type: 'heading', headingLevel: 2, content: 'Dynamic Function Models' },
-  { id: 'b7', type: 'math', content: 'y = 2*x^2 - 4*x - 6' },
-  { id: 'b8', type: 'math', content: 'z = sin(x) * cos(y)' },
-  { id: 'b9', type: 'heading', headingLevel: 2, content: 'Unit Conversions' },
-  { id: 'b10', type: 'math', content: '50 m in ft =' },
-  { id: 'b11', type: 'math', content: '100 degC in degF =' },
-  { id: 'b12', type: 'checklist', content: 'Adjust mass or velocity with the slider to see kineticEnergy recalculate live', checked: true },
-  { id: 'b13', type: 'checklist', content: 'Inspect roots and extrema on 2D and 3D graphs', checked: true }
-];
+export const TUTORIAL_PRESETS: Record<string, { label: string; icon: string; blocks: DocumentBlock[] }> = {
+  trip: {
+    label: 'Trip Budget',
+    icon: '🏖️',
+    blocks: [
+      { id: 't1', type: 'heading', headingLevel: 1, content: 'Vacation & Travel Budget (Tutorial Demo)' },
+      { id: 't2', type: 'text', content: 'As demonstrated in Apple Math Notes, variables propagate reactively downstream. Tap "Adjust" on nights or food to scrub values live:' },
+      { id: 't3', type: 'math', content: 'hotelPerNight = 180' },
+      { id: 't4', type: 'math', content: 'nights = 4' },
+      { id: 't5', type: 'math', content: 'foodDaily = 65' },
+      { id: 't6', type: 'math', content: 'flights = 320' },
+      { id: 't7', type: 'math', content: 'hotelTotal = hotelPerNight * nights =' },
+      { id: 't8', type: 'math', content: 'foodTotal = foodDaily * nights =' },
+      { id: 't9', type: 'math', content: 'tripTotal = hotelTotal + foodTotal + flights =' },
+      { id: 't10', type: 'checklist', content: 'Tap Adjust on "nights" or "foodDaily" to see tripTotal change instantly', checked: true }
+    ]
+  },
+  geometry: {
+    label: 'Circle Geometry',
+    icon: '📐',
+    blocks: [
+      { id: 'g1', type: 'heading', headingLevel: 1, content: 'Circle Geometry & Trigonometry' },
+      { id: 'g2', type: 'text', content: 'Define radius and calculate area, circumference, and volume with built-in constants (pi, e):' },
+      { id: 'g3', type: 'math', content: 'radius = 7' },
+      { id: 'g4', type: 'math', content: 'area = pi * radius^2 =' },
+      { id: 'g5', type: 'math', content: 'circumference = 2 * pi * radius =' },
+      { id: 'g6', type: 'math', content: 'sphereVolume = (4/3) * pi * radius^3 =' },
+      { id: 'g7', type: 'math', content: 'cos(pi) =' },
+      { id: 'g8', type: 'checklist', content: 'Scrub radius slider from 7 to 15 to observe reactive updates', checked: false }
+    ]
+  },
+  physics: {
+    label: 'Physics & Graphs',
+    icon: '📈',
+    blocks: [
+      { id: 'p1', type: 'heading', headingLevel: 1, content: 'Physics & Function Models' },
+      { id: 'p2', type: 'text', content: 'Kinematics formulas and dynamic 2D parabola / 3D surface graphs:' },
+      { id: 'p3', type: 'math', content: 'mass = 12.5' },
+      { id: 'p4', type: 'math', content: 'velocity = 4.2' },
+      { id: 'p5', type: 'math', content: 'kineticEnergy = 0.5 * mass * velocity^2 =' },
+      { id: 'p6', type: 'heading', headingLevel: 2, content: 'Dynamic Function Models' },
+      { id: 'p7', type: 'math', content: 'y = 2*x^2 - 4*x - 6' },
+      { id: 'p8', type: 'math', content: 'z = sin(x) * cos(y)' }
+    ]
+  },
+  column: {
+    label: 'Column Math & Logic',
+    icon: '🧮',
+    blocks: [
+      { id: 'c1', type: 'heading', headingLevel: 1, content: 'Column Summation, Logic & Units' },
+      { id: 'c2', type: 'text', content: 'Vertical column addition (drawing a line under numbers) and boolean verifications:' },
+      { id: 'c3', type: 'math', content: '145\n+ 280\n+  75\n-----' },
+      { id: 'c4', type: 'heading', headingLevel: 2, content: 'Logical Truth Verifications' },
+      { id: 'c5', type: 'math', content: '7 = 9' },
+      { id: 'c6', type: 'math', content: '12 * 12 = 144' },
+      { id: 'c7', type: 'math', content: '15 > 8' },
+      { id: 'c8', type: 'math', content: '4 in {1, 2, 4, 8}' },
+      { id: 'c9', type: 'heading', headingLevel: 2, content: 'Inline Unit Conversions' },
+      { id: 'c10', type: 'math', content: '50 m in ft =' },
+      { id: 'c11', type: 'math', content: '100 degC in degF =' },
+      { id: 'c12', type: 'math', content: '75 kg in lb =' }
+    ]
+  }
+};
 
 export const AppleMathNotes = () => {
-  const [blocks, setBlocks] = useState<DocumentBlock[]>(DEFAULT_DOC_BLOCKS);
+  const [activePresetKey, setActivePresetKey] = useState<string>('physics');
+  const [blocks, setBlocks] = useState<DocumentBlock[]>(TUTORIAL_PRESETS.physics.blocks);
   const [inputMode, setInputMode] = useState<InputMode>('split');
   const [displayMode, setDisplayMode] = useState<DisplayMode>('insert');
   const [showSymbolInspector, setShowSymbolInspector] = useState(false);
@@ -84,7 +134,7 @@ export const AppleMathNotes = () => {
   const [activePenColor, setActivePenColor] = useState('#ff9f0a'); // Apple Notes signature amber
   const [penStrokeWidth, setPenStrokeWidth] = useState(2.5);
   const [activeScrubberBlockId, setActiveScrubberBlockId] = useState<string | null>(null);
-  const [expandedGraphs, setExpandedGraphs] = useState<Record<string, boolean>>({ b7: true, b8: true });
+  const [expandedGraphs, setExpandedGraphs] = useState<Record<string, boolean>>({ p7: true, p8: true });
   const [copiedNotification, setCopiedNotification] = useState<string | null>(null);
 
   // Handwritten Canvas State
@@ -193,6 +243,102 @@ export const AppleMathNotes = () => {
     setTimeout(() => setCopiedNotification(null), 1800);
   };
 
+  const loadPreset = (presetKey: string) => {
+    setActivePresetKey(presetKey);
+    const preset = TUTORIAL_PRESETS[presetKey];
+    if (preset) {
+      setBlocks(preset.blocks);
+      setExpandedGraphs({ p7: true, p8: true });
+      setActiveScrubberBlockId(null);
+    }
+  };
+
+  // Apple Pencil Handwriting Demo Simulation
+  const drawSampleHandwriting = () => {
+    if (!sigPadRef.current || !canvasContainerRef.current) return;
+    const canvas = sigPadRef.current.getCanvas();
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    sigPadRef.current.clear();
+    setHandwrittenItems([]);
+    setStatusNotice('Simulating Apple Pencil stroke & calculating...');
+
+    ctx.save();
+    ctx.strokeStyle = activePenColor;
+    ctx.lineWidth = 3.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    const startX = 60;
+    const startY = 120;
+
+    // Draw '2'
+    ctx.beginPath();
+    ctx.arc(startX + 18, startY + 15, 14, Math.PI, 0);
+    ctx.lineTo(startX + 6, startY + 45);
+    ctx.lineTo(startX + 30, startY + 45);
+    ctx.stroke();
+
+    // Draw '4'
+    ctx.beginPath();
+    ctx.moveTo(startX + 55, startY + 6);
+    ctx.lineTo(startX + 42, startY + 30);
+    ctx.lineTo(startX + 68, startY + 30);
+    ctx.moveTo(startX + 60, startY + 15);
+    ctx.lineTo(startX + 60, startY + 45);
+    ctx.stroke();
+
+    // Draw '+'
+    ctx.beginPath();
+    ctx.moveTo(startX + 88, startY + 26);
+    ctx.lineTo(startX + 108, startY + 26);
+    ctx.moveTo(startX + 98, startY + 16);
+    ctx.lineTo(startX + 98, startY + 36);
+    ctx.stroke();
+
+    // Draw '3'
+    ctx.beginPath();
+    ctx.arc(startX + 128, startY + 16, 10, -Math.PI * 0.7, Math.PI * 0.5);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(startX + 128, startY + 34, 11, -Math.PI * 0.5, Math.PI * 0.8);
+    ctx.stroke();
+
+    // Draw '6'
+    ctx.beginPath();
+    ctx.arc(startX + 162, startY + 32, 12, 0, Math.PI * 2);
+    ctx.moveTo(startX + 169, startY + 8);
+    ctx.quadraticCurveTo(startX + 150, startY + 15, startX + 150, startY + 32);
+    ctx.stroke();
+
+    // Draw '='
+    ctx.beginPath();
+    ctx.moveTo(startX + 190, startY + 22);
+    ctx.lineTo(startX + 218, startY + 22);
+    ctx.moveTo(startX + 190, startY + 32);
+    ctx.lineTo(startX + 218, startY + 32);
+    ctx.stroke();
+
+    ctx.restore();
+
+    setTimeout(() => {
+      setHandwrittenItems([
+        {
+          id: `demo-${Date.now()}`,
+          original: '24 + 36 =',
+          result: '60',
+          x: startX + 236,
+          y: startY + 28,
+          fontSize: 34,
+          isWrapped: false,
+          status: displayMode === 'insert' ? 'inserted' : 'suggested'
+        }
+      ]);
+      setStatusNotice('');
+    }, 450);
+  };
+
   // Handwritten Vector Ingestion & OCR/Vision Evaluation
   const evaluateHandwriting = async () => {
     if (!sigPadRef.current || sigPadRef.current.isEmpty() || !canvasContainerRef.current) return;
@@ -207,13 +353,13 @@ export const AppleMathNotes = () => {
     const containerH = canvasContainerRef.current.offsetHeight || 500;
 
     const prompt = `You are Apple iPadOS Math Notes OCR and math parsing engine.
-Extract all handwritten math equations, inequalities, assignments, and logic expressions.
+Extract all handwritten math equations, inequalities, assignments, logic expressions, and vertical column math (stacked numbers with a horizontal underline).
 Evaluate each expression using current symbol context.
 For each expression, return:
-- "original": text representation (e.g. "radius = 14", "7=9", "y = sin(x)")
-- "result": computed answer or boolean ("14", "false", "28.5")
-- "equals_x_percent": 0 to 100 percentage from left of canvas where the '=' sign ends
-- "equals_y_percent": 0 to 100 percentage from top of canvas where the '=' sign is located
+- "original": text representation (e.g. "radius = 14", "7=9", "y = sin(x)", or "120 + 350")
+- "result": computed answer or boolean ("14", "false", "28.5", "470")
+- "equals_x_percent": 0 to 100 percentage from left of canvas where the '=' sign or underline ends
+- "equals_y_percent": 0 to 100 percentage from top of canvas where the '=' sign or underline is located
 - "height_percent": 0 to 100 percentage height of the handwriting
 Return raw JSON array:
 [
@@ -415,20 +561,55 @@ Return raw JSON array:
         {(inputMode === 'split' || inputMode === 'text') && (
           <div className="document-stream-pane">
             <div className="stream-header">
-              <span className="stream-title">Digital Document Stream</span>
-              <div className="add-block-actions">
-                <button className="add-chip" onClick={() => addBlock('math')}>
-                  <Plus size={12} /> Math
-                </button>
-                <button className="add-chip" onClick={() => addBlock('text')}>
-                  <Plus size={12} /> Text
-                </button>
-                <button className="add-chip" onClick={() => addBlock('checklist')}>
-                  <Plus size={12} /> Task
-                </button>
-                <button className="add-chip" onClick={() => addBlock('heading')}>
-                  <Plus size={12} /> Heading
-                </button>
+              <div className="stream-header-top">
+                <div className="stream-title-group">
+                  <span className="stream-title">Digital Document Stream</span>
+                  <span className="stream-badge">{blocks.length} blocks</span>
+                </div>
+                <div className="add-block-actions">
+                  <button className="add-chip" onClick={() => addBlock('math')}>
+                    <Plus size={12} /> Math
+                  </button>
+                  <button 
+                    className="add-chip" 
+                    onClick={() => {
+                      const colBlock: DocumentBlock = {
+                        id: `col-${Date.now()}`,
+                        type: 'math',
+                        content: '145\n+ 280\n+  75\n-----'
+                      };
+                      setBlocks(prev => [...prev, colBlock]);
+                    }}
+                    title="Insert Column Arithmetic with Horizontal Line"
+                  >
+                    <Plus size={12} /> Column Sum
+                  </button>
+                  <button className="add-chip" onClick={() => addBlock('text')}>
+                    <Plus size={12} /> Text
+                  </button>
+                  <button className="add-chip" onClick={() => addBlock('checklist')}>
+                    <Plus size={12} /> Task
+                  </button>
+                  <button className="add-chip" onClick={() => addBlock('heading')}>
+                    <Plus size={12} /> Heading
+                  </button>
+                </div>
+              </div>
+
+              {/* Step-by-Step Tutorial Presets Row */}
+              <div className="preset-scenarios-row">
+                <span className="preset-label">Tutorial Scenarios:</span>
+                {Object.entries(TUTORIAL_PRESETS).map(([key, item]) => (
+                  <button
+                    key={key}
+                    className={`preset-pill ${activePresetKey === key ? 'active' : ''}`}
+                    onClick={() => loadPreset(key)}
+                    title={`Load ${item.label}`}
+                  >
+                    <span className="preset-icon">{item.icon}</span>
+                    <span className="preset-name">{item.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -813,6 +994,16 @@ Return raw JSON array:
                 </div>
 
                 <div className="kit-divider" />
+
+                {/* Pencil Demo */}
+                <button 
+                  className="kit-demo-btn" 
+                  onClick={drawSampleHandwriting}
+                  title="Simulate Apple Pencil Handwriting (24 + 36 =)"
+                >
+                  <Sparkles size={14} />
+                  <span>Pencil Demo</span>
+                </button>
 
                 {/* Clear & Solve Actions */}
                 <button className="kit-action-btn" onClick={clearCanvas} title="Clear Canvas">

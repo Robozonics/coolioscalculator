@@ -9,6 +9,7 @@ type Mode = 'calculator' | 'converter' | 'notes';
 
 function App() {
   const [mode, setMode] = useState<Mode>('notes'); // Default to Apple Math Notes
+  const [showFloatMenu, setShowFloatMenu] = useState(false);
 
   return (
     <div className="google-app-root">
@@ -60,6 +61,53 @@ function App() {
           {mode === 'converter' && <UnitConverter />}
         </div>
       </main>
+
+      {/* iPadOS Signature Floating Mode Switcher Button (As seen in tutorial video) */}
+      <div className="ipados-float-switcher-wrapper">
+        <button 
+          className={`ipados-float-switcher-btn ${showFloatMenu ? 'open' : ''}`}
+          onClick={() => setShowFloatMenu(!showFloatMenu)}
+          title="iPadOS Calculator Switcher Menu"
+        >
+          <CalcIcon size={20} />
+        </button>
+
+        {showFloatMenu && (
+          <div className="ipados-float-popover">
+            <div className="popover-title">Calculator Modes</div>
+            <button 
+              className={`popover-item ${mode === 'notes' ? 'active' : ''}`}
+              onClick={() => { setMode('notes'); setShowFloatMenu(false); }}
+            >
+              <Pencil size={15} color="#ff9f0a" />
+              <div className="item-text">
+                <span className="name">Math Notes</span>
+                <span className="desc">Handwriting, variables, & graphs</span>
+              </div>
+            </button>
+            <button 
+              className={`popover-item ${mode === 'calculator' ? 'active' : ''}`}
+              onClick={() => { setMode('calculator'); setShowFloatMenu(false); }}
+            >
+              <CalcIcon size={15} color="#4285F4" />
+              <div className="item-text">
+                <span className="name">Google Calculator</span>
+                <span className="desc">Scientific & basic keys</span>
+              </div>
+            </button>
+            <button 
+              className={`popover-item ${mode === 'converter' ? 'active' : ''}`}
+              onClick={() => { setMode('converter'); setShowFloatMenu(false); }}
+            >
+              <ArrowLeftRight size={15} color="#34A853" />
+              <div className="item-text">
+                <span className="name">Unit Converter</span>
+                <span className="desc">Length, temperature, mass</span>
+              </div>
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Footer Info */}
       <footer className="google-footer">
