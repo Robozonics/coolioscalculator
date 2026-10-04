@@ -1,27 +1,27 @@
-import React, { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import * as math from 'mathjs';
 import { Calculator as CalcIcon } from 'lucide-react';
 
 interface Props {
   isScientific: boolean;
   onToggleScientific: () => void;
-  onSaveHistory: (expr: string, res: string) => void;
 }
 
-const BasicCalculator: React.FC<Props> = ({ isScientific, onToggleScientific, onSaveHistory }) => {
+const BasicCalculator = ({ isScientific, onToggleScientific }: Props) => {
   const [expression, setExpression] = useState('');
   const [result, setResult] = useState('0');
   const [isRad, setIsRad] = useState(true);
+  const [justCalculated, setJustCalculated] = useState(false);
 
   const handlePress = (val: string) => {
-    if (result !== '0' && expression === '') {
-      // Starting new calc after result
+    if (justCalculated) {
       if (['+', '-', '*', '/', '^'].includes(val)) {
         setExpression(result + val);
       } else {
         setExpression(val);
         setResult('0');
       }
+      setJustCalculated(false);
     } else {
       setExpression((prev) => prev + val);
     }
@@ -32,45 +32,40 @@ const BasicCalculator: React.FC<Props> = ({ isScientific, onToggleScientific, on
       if (!expression) return;
       let toEval = expression;
       
-      // If we are in degree mode, we need to convert for trig functions, but math.js uses radians by default.
-      // A full implementation would parse and inject rad/deg conversions, but we'll stick to rad mostly for simplicity,
-      // or replace 'sin(' with 'sin(deg(' if !isRad. 
-      // For this demo, we'll just evaluate standardly using math.js.
-      
       const res = math.evaluate(toEval);
       const resStr = Number.isInteger(res) ? res.toString() : parseFloat(res.toFixed(8)).toString();
       
       setResult(resStr);
-      onSaveHistory(expression + ' =', resStr);
-      setExpression('');
+      setExpression(toEval + ' =');
+      setJustCalculated(true);
     } catch (e) {
       setResult('Error');
+      setJustCalculated(true);
     }
   };
 
   const clearAll = () => {
     setExpression('');
     setResult('0');
+    setJustCalculated(false);
   };
 
   const toggleSign = () => {
-    if (expression) return; // Complex to toggle sign of expression, we toggle result
-    if (result !== '0') {
+    if (result !== '0' && result !== 'Error') {
       setResult((parseFloat(result) * -1).toString());
     }
   };
 
   const applyPercent = () => {
-    if (expression) return;
-    if (result !== '0') {
+    if (result !== '0' && result !== 'Error') {
       setResult((parseFloat(result) / 100).toString());
     }
   };
 
   const basicPad = [
-    { label: 'AC', type: 'secondary', action: clearAll },
-    { label: '+/-', type: 'secondary', action: toggleSign },
-    { label: '%', type: 'secondary', action: applyPercent },
+    { label: 'AC', type: 'sec', action: clearAll },
+    { label: '+/-', type: 'sec', action: toggleSign },
+    { label: '%', type: 'sec', action: applyPercent },
     { label: '÷', val: '/', type: 'op', action: () => handlePress('/') },
     { label: '7', val: '7', type: 'num', action: () => handlePress('7') },
     { label: '8', val: '8', type: 'num', action: () => handlePress('8') },
@@ -105,7 +100,7 @@ const BasicCalculator: React.FC<Props> = ({ isScientific, onToggleScientific, on
     { label: '1/x', action: () => handlePress('1/') },
     { label: '√x', action: () => handlePress('sqrt(') },
     { label: '∛x', action: () => handlePress('cbrt(') },
-    { label: 'ʸ√x', action: () => {} }, // Requires custom parsing
+    { label: 'ʸ√x', action: () => {} },
     { label: 'ln', action: () => handlePress('log(') },
     { label: 'log₁₀', action: () => handlePress('log10(') },
     { label: 'x!', action: () => handlePress('!') },
@@ -123,42 +118,37 @@ const BasicCalculator: React.FC<Props> = ({ isScientific, onToggleScientific, on
   ];
 
   return (
-    <div className="calc-container">
-      <div style={{ position: 'absolute', top: 80, left: 20 }}>
+    <>
+      <div style={{ position: 'absolute', top: 25, left: 30 }}>
         <button 
-          className="icon-btn" 
+          className="btn sci" 
+          style={{ width: 40, height: 40, borderRadius: '50%' }}
           onClick={onToggleScientific}
-          title="Toggle Scientific Mode"
-          style={{ background: isScientific ? 'rgba(255, 159, 10, 0.2)' : 'transparent' }}
+          title="Scientific Mode"
         >
-          <CalcIcon size={20} />
+          <CalcIcon size={20} color={isScientific ? '#ff9f0a' : 'white'} />
         </button>
       </div>
 
-      <div className="display-area">
-        <div className="expression-text">{expression}</div>
-        <div className="result-text">{result}</div>
+      <div className="display-section">
+        <div className="expr-display">{expression}</div>
+        <div className={`res-display ${result.length > 8 ? (result.length > 12 ? 'very-long' : 'long') : ''}`}>
+          {result}
+        </div>
       </div>
       
-      <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+      <div className="keypad-container">
         {isScientific && (
-          <div className="keypad scientific-grid" style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(6, 1fr)', 
-            gap: 12, 
-            maxWidth: 600,
-            opacity: 1,
-            transition: 'opacity 0.3s'
-          }}>
+          <div className="keypad-sci">
             {scientificPad.map((btn, i) => (
-              <button key={i} className="btn sci-btn" onClick={btn.action}>
+              <button key={i} className="btn sci" onClick={btn.action}>
                 {btn.label}
               </button>
             ))}
           </div>
         )}
 
-        <div className="keypad basic-grid">
+        <div className="keypad-basic">
           {basicPad.map((btn, i) => (
             <button 
               key={i} 
@@ -170,7 +160,7 @@ const BasicCalculator: React.FC<Props> = ({ isScientific, onToggleScientific, on
           ))}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
