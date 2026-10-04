@@ -2,17 +2,17 @@ import { useState } from 'react';
 import './App.css';
 import { Calculator as CalcIcon, Pencil, ArrowLeftRight } from 'lucide-react';
 import BasicCalculator from './components/BasicCalculator';
-import MathNotes from './components/MathNotes';
+import { AppleMathNotes } from './components/AppleMathNotes';
 import UnitConverter from './components/UnitConverter';
 
 type Mode = 'calculator' | 'converter' | 'notes';
 
 function App() {
-  const [mode, setMode] = useState<Mode>('calculator');
+  const [mode, setMode] = useState<Mode>('notes'); // Default to Apple Math Notes
 
   return (
     <div className="google-app-root">
-      {/* Top Google Header */}
+      {/* Top Header */}
       <header className="google-nav-header">
         <div className="google-brand">
           <svg className="google-g-icon" viewBox="0 0 24 24" width="22" height="22">
@@ -21,17 +21,25 @@ function App() {
             <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.26C.46 8.18 0 9.99 0 12s.46 3.82 1.26 5.42l4.02-3.13z"/>
             <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.27 2.64 1.26 6.58l4.02 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/>
           </svg>
-          <span className="google-title">Google Calculator</span>
+          <span className="google-title">Math Notes & Calculator</span>
         </div>
 
         {/* Navigation Tabs */}
         <nav className="google-tabs">
           <button 
+            className={`google-tab ${mode === 'notes' ? 'active' : ''}`}
+            onClick={() => setMode('notes')}
+          >
+            <Pencil size={16} />
+            <span>Math Notes (iPadOS)</span>
+          </button>
+
+          <button 
             className={`google-tab ${mode === 'calculator' ? 'active' : ''}`}
             onClick={() => setMode('calculator')}
           >
             <CalcIcon size={16} />
-            <span>Calculator</span>
+            <span>Google Calculator</span>
           </button>
           
           <button 
@@ -41,29 +49,21 @@ function App() {
             <ArrowLeftRight size={16} />
             <span>Converter</span>
           </button>
-
-          <button 
-            className={`google-tab ${mode === 'notes' ? 'active' : ''}`}
-            onClick={() => setMode('notes')}
-          >
-            <Pencil size={16} />
-            <span>Math Notes</span>
-          </button>
         </nav>
       </header>
 
       {/* Main Container */}
       <main className="google-main-content">
         <div className={`google-card-wrapper ${mode}`}>
+          {mode === 'notes' && <AppleMathNotes />}
           {mode === 'calculator' && <BasicCalculator />}
           {mode === 'converter' && <UnitConverter />}
-          {mode === 'notes' && <MathNotes />}
         </div>
       </main>
 
       {/* Footer Info */}
       <footer className="google-footer">
-        <span>Powered by Google Dark Theme & Gemini Math Engine</span>
+        <span>Stateful Multi-Modal Math Engine • Reactive DAG • 2D/3D Graphs</span>
       </footer>
     </div>
   );

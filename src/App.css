@@ -958,3 +958,992 @@ body, html {
 .graph-body {
   width: 100%;
 }
+
+/* ==========================================================================
+   APPLE IPADOS MATH NOTES & STATEFUL COMPUTATIONAL ENGINE
+   ========================================================================== */
+
+.google-card-wrapper.notes {
+  max-width: 1150px;
+  width: 100%;
+  height: 84vh;
+  min-height: 600px;
+}
+
+.apple-math-notes-root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #1c1c1e;
+  border: 1px solid #38383a;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  position: relative;
+}
+
+/* Top Apple Notes Toolbar */
+.apple-notes-header {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: rgba(44, 44, 46, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 12px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.apple-icon-badge {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #ff9f0a, #ffb340);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(255, 159, 10, 0.4);
+}
+
+.header-titles {
+  display: flex;
+  flex-direction: column;
+}
+
+.apple-app-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.2px;
+}
+
+.apple-app-subtitle {
+  font-size: 11px;
+  color: #8e8e93;
+}
+
+.header-center {
+  display: flex;
+  align-items: center;
+}
+
+/* iOS Segmented Control */
+.apple-segmented-control {
+  display: flex;
+  background-color: #1c1c1e;
+  padding: 3px;
+  border-radius: 9px;
+  border: 1px solid #38383a;
+}
+
+.apple-segment {
+  background: transparent;
+  border: none;
+  color: #8e8e93;
+  padding: 5px 14px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+
+.apple-segment:hover {
+  color: #ffffff;
+}
+
+.apple-segment.active {
+  background-color: #3a3a3c;
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.apple-mode-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #1c1c1e;
+  border: 1px solid #38383a;
+  border-radius: 14px;
+  padding: 2px 4px 2px 8px;
+}
+
+.chip-label {
+  font-size: 11px;
+  color: #8e8e93;
+  text-transform: uppercase;
+}
+
+.chip-btn {
+  background: transparent;
+  border: none;
+  color: #8e8e93;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chip-btn.active {
+  background-color: #ff9f0a;
+  color: #000000;
+  font-weight: 600;
+}
+
+.apple-action-icon-btn {
+  background-color: #2c2c2e;
+  border: 1px solid #38383a;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.apple-action-icon-btn:hover {
+  background-color: #3a3a3c;
+}
+
+.apple-action-icon-btn.active {
+  background-color: #ff9f0a;
+  color: #000000;
+  border-color: #ff9f0a;
+}
+
+.var-count-badge {
+  background-color: rgba(255, 255, 255, 0.15);
+  padding: 1px 5px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   WORKSPACE DUAL STREAM (DOCUMENT + CANVAS)
+   ========================================================================== */
+
+.apple-workspace {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+.apple-workspace.split {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+}
+
+.apple-workspace.text .document-stream-pane {
+  width: 100%;
+}
+
+.apple-workspace.canvas .canvas-stream-pane {
+  width: 100%;
+}
+
+/* Stream Pane Styles */
+.document-stream-pane,
+.canvas-stream-pane {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background-color: #1c1c1e;
+}
+
+.document-stream-pane {
+  border-right: 1px solid #2c2c2e;
+}
+
+.stream-header {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background-color: #242426;
+  border-bottom: 1px solid #2c2c2e;
+}
+
+.stream-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.add-block-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.add-chip {
+  background-color: #2c2c2e;
+  border: 1px solid #38383a;
+  color: #ffffff;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.add-chip:hover {
+  background-color: #ff9f0a;
+  color: #000000;
+}
+
+/* Document Blocks List */
+.document-blocks-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.doc-block {
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+.block-delete-btn {
+  background: transparent;
+  border: none;
+  color: #636366;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.doc-block:hover .block-delete-btn {
+  opacity: 1;
+}
+
+.block-delete-btn:hover {
+  color: #ff453a;
+}
+
+/* Headings */
+.heading-block-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collapse-toggle-btn {
+  background: transparent;
+  border: none;
+  color: #ff9f0a;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.heading-input {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-family: inherit;
+  font-weight: 700;
+  outline: none;
+  flex: 1;
+}
+
+.heading-input.level-1 {
+  font-size: 22px;
+  border-bottom: 1px solid #38383a;
+  padding-bottom: 4px;
+}
+
+.heading-input.level-2 {
+  font-size: 17px;
+  color: #ff9f0a;
+}
+
+/* Text Paragraph */
+.text-block-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.text-input {
+  background: transparent;
+  border: none;
+  color: #d1d1d6;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  flex: 1;
+  outline: none;
+}
+
+/* Checklist */
+.checklist-block-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.check-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.checklist-input {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 14px;
+  outline: none;
+  flex: 1;
+}
+
+.checklist-input.completed {
+  text-decoration: line-through;
+  color: #636366;
+}
+
+/* Math Block */
+.math-block-wrapper {
+  background-color: #242426;
+  border: 1px solid #38383a;
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.math-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.math-code-input {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-family: 'SF Mono', Monaco, Menlo, Consolas, monospace;
+  font-size: 15px;
+  font-weight: 500;
+  outline: none;
+  flex: 1;
+}
+
+/* Immediate Inline Answer Pill */
+.inline-eval-anchor {
+  display: flex;
+  align-items: center;
+}
+
+.immediate-answer-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #323236;
+  border: 1px solid #48484a;
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+
+.equals-symbol {
+  color: #ff9f0a;
+  font-weight: 700;
+}
+
+.answer-value {
+  color: #007aff;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.answer-value.text-true {
+  color: #30d158;
+}
+
+.answer-value.text-false {
+  color: #ff453a;
+}
+
+.inline-error-badge {
+  background-color: rgba(255, 69, 58, 0.15);
+  border: 1px solid #ff453a;
+  color: #ff453a;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.inline-graph-indicator {
+  background-color: rgba(0, 122, 255, 0.15);
+  border: 1px solid #007aff;
+  color: #007aff;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.suggest-pill-mini {
+  background-color: #323236;
+  border: 1px solid #ff9f0a;
+  color: #ff9f0a;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.suggest-pill-mini .dot {
+  width: 6px;
+  height: 6px;
+  background-color: #ff9f0a;
+  border-radius: 50%;
+}
+
+.embedded-graph-container {
+  margin-top: 4px;
+  border-top: 1px solid #38383a;
+  padding-top: 8px;
+}
+
+/* ==========================================================================
+   STREAM A: HANDWRITING STYLUS CANVAS
+   ========================================================================== */
+
+.canvas-tool-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-palette {
+  display: flex;
+  gap: 4px;
+}
+
+.color-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.color-dot.active {
+  transform: scale(1.3);
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
+.stroke-width-select {
+  background-color: #2c2c2e;
+  border: 1px solid #38383a;
+  color: #ffffff;
+  font-size: 11px;
+  border-radius: 6px;
+  padding: 3px 6px;
+  outline: none;
+}
+
+.canvas-action-btn {
+  background: transparent;
+  border: 1px solid #38383a;
+  color: #ffffff;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.canvas-action-btn:hover {
+  background-color: #2c2c2e;
+}
+
+.canvas-solve-primary {
+  background-color: #ff9f0a;
+  border: none;
+  color: #000000;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.canvas-solve-primary:disabled {
+  opacity: 0.6;
+}
+
+.canvas-interactive-area {
+  flex: 1;
+  position: relative;
+  background-color: #1c1c1e;
+  cursor: crosshair;
+}
+
+.canvas-interactive-area::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-size: 24px 24px;
+  background-image: 
+    radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  pointer-events: none;
+}
+
+.apple-drawing-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* Handwritten Inline Answers */
+.canvas-inline-result {
+  position: absolute;
+  z-index: 15;
+  display: inline-flex;
+  align-items: baseline;
+  line-height: 1;
+  animation: popInline 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.handwritten-font-replica {
+  font-family: 'Caveat', cursive, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: baseline;
+  padding: 2px 8px;
+  border-radius: 6px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.handwritten-font-replica.num-val {
+  color: #007aff;
+  background-color: rgba(0, 122, 255, 0.12);
+}
+
+.handwritten-font-replica.bool-true {
+  color: #30d158;
+  background-color: rgba(48, 209, 88, 0.15);
+}
+
+.handwritten-font-replica.bool-false {
+  color: #ff453a;
+  background-color: rgba(255, 69, 58, 0.15);
+}
+
+.canvas-inline-result.wrapped-subline {
+  border-left: 2px solid #007aff;
+  padding-left: 6px;
+}
+
+.remove-hw-btn {
+  background: transparent;
+  border: none;
+  color: #636366;
+  cursor: pointer;
+  padding: 2px;
+  margin-left: 4px;
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+}
+
+.canvas-inline-result:hover .remove-hw-btn {
+  display: inline-flex;
+}
+
+.remove-hw-btn:hover {
+  color: #ffffff;
+}
+
+/* Canvas Suggest Pill */
+.canvas-suggest-pill {
+  position: absolute;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  background-color: #2c2c2e;
+  border: 1px solid #ff9f0a;
+  border-radius: 14px;
+  padding: 2px 4px 2px 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  animation: pulsePill 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.suggest-click-target {
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #ff9f0a;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.suggest-click-target .dot {
+  width: 6px;
+  height: 6px;
+  background-color: #ff9f0a;
+  border-radius: 50%;
+}
+
+.suggest-close {
+  background: transparent;
+  border: none;
+  color: #8e8e93;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.canvas-status-banner {
+  position: absolute;
+  top: 50px;
+  left: 16px;
+  z-index: 20;
+  background-color: rgba(44, 44, 46, 0.95);
+  border: 1px solid #ff9f0a;
+  color: #ff9f0a;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.canvas-spinner {
+  width: 10px;
+  height: 10px;
+  border: 2px solid #ff9f0a;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ==========================================================================
+   2D & 3D GRAPHING CARDS
+   ========================================================================== */
+
+.apple-graph-2d,
+.apple-graph-3d {
+  background-color: #1c1c1e;
+  border: 1px solid #38383a;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.graph-toolbar {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  background-color: #242426;
+  border-bottom: 1px solid #38383a;
+}
+
+.graph-title-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.graph-badge {
+  background-color: #007aff;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.graph-badge.badge-3d {
+  background: linear-gradient(135deg, #af52de, #5856d6);
+}
+
+.graph-function-title {
+  font-family: 'SF Mono', monospace;
+  font-size: 12px;
+  color: #d1d1d6;
+}
+
+.graph-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.graph-btn {
+  background: transparent;
+  border: 1px solid #38383a;
+  color: #8e8e93;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.graph-btn:hover {
+  color: #ffffff;
+  background-color: #2c2c2e;
+}
+
+.graph-btn.active {
+  background-color: #007aff;
+  color: #ffffff;
+  border-color: #007aff;
+}
+
+.canvas-wrapper {
+  position: relative;
+}
+
+.hover-coord-badge {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.85);
+  border: 1px solid #007aff;
+  color: #ffffff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: monospace;
+  pointer-events: none;
+}
+
+.graph-footer-legend {
+  padding: 6px 12px;
+  background-color: #242426;
+  border-top: 1px solid #2c2c2e;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legend-text {
+  font-size: 11px;
+  color: #8e8e93;
+  font-family: monospace;
+}
+
+.critical-points-summary {
+  display: flex;
+  gap: 6px;
+}
+
+.cp-tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.cp-tag.root {
+  background-color: rgba(48, 209, 88, 0.2);
+  color: #30d158;
+}
+
+.cp-tag.maximum {
+  background-color: rgba(255, 159, 10, 0.2);
+  color: #ff9f0a;
+}
+
+.cp-tag.minimum {
+  background-color: rgba(191, 90, 242, 0.2);
+  color: #bf5af2;
+}
+
+/* ==========================================================================
+   STATEFUL SYMBOL INSPECTOR HUD DRAWER
+   ========================================================================== */
+
+.symbol-inspector-drawer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 240px;
+  background-color: #242426;
+  border-top: 1px solid #38383a;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+}
+
+.inspector-header {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid #2c2c2e;
+}
+
+.inspector-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.inspector-close {
+  background: transparent;
+  border: none;
+  color: #8e8e93;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.inspector-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+}
+
+.empty-symbol-msg {
+  color: #8e8e93;
+  font-size: 12px;
+  text-align: center;
+  padding: 16px;
+}
+
+.symbol-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.symbol-card {
+  background-color: #1c1c1e;
+  border: 1px solid #38383a;
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.symbol-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sym-name {
+  font-weight: 700;
+  color: #ff9f0a;
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.sym-value {
+  font-weight: 700;
+  color: #007aff;
+  font-size: 13px;
+}
+
+.symbol-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.sym-expr {
+  color: #8e8e93;
+}
+
+.sym-dag {
+  color: #30d158;
+}
+
+/* Mobile Responsiveness for Apple Math Notes */
+@media (max-width: 768px) {
+  .apple-workspace.split {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .header-titles {
+    display: none;
+  }
+}
+
