@@ -710,91 +710,222 @@ body, html {
   display: block;
 }
 
-/* Floating Results Card in Google Dark Theme */
-.math-results-card {
-  position: absolute;
-  top: 65px;
-  right: 16px;
-  z-index: 20;
-  background-color: var(--g-surface);
-  border: 1px solid var(--g-border-strong);
-  border-radius: 8px;
-  padding: 12px 16px;
-  max-width: 280px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-}
-
-.results-card-header {
+.display-mode-selector {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--g-text-muted);
-  text-transform: uppercase;
-  margin-bottom: 8px;
-  border-bottom: 1px solid var(--g-border);
-  padding-bottom: 4px;
+  gap: 6px;
+  background-color: var(--g-bg);
+  padding: 2px 4px 2px 8px;
+  border-radius: 16px;
+  border: 1px solid var(--g-border);
 }
 
-.close-mini-btn {
+.mode-label {
+  font-size: 11px;
+  color: var(--g-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mode-pill-toggle {
+  display: flex;
+  gap: 2px;
+  background-color: var(--g-surface);
+  border-radius: 12px;
+  padding: 1px;
+}
+
+.mode-pill-btn {
   background: transparent;
   border: none;
   color: var(--g-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 10px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  padding: 2px;
+  transition: all 0.15s ease;
 }
 
-.close-mini-btn:hover {
+.mode-pill-btn:hover {
   color: #ffffff;
 }
 
-.results-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.math-result-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-}
-
-.result-orig {
-  color: var(--g-text-muted);
-  font-weight: 400;
-}
-
-.result-arrow {
-  color: var(--g-border-strong);
-  font-size: 13px;
-}
-
-.result-val {
+.mode-pill-btn.active {
+  background-color: #394457;
+  color: var(--g-blue-light);
   font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 4px;
-  display: inline-flex;
-  align-items: center;
 }
 
-.result-val.num-val {
+/* ==========================================================================
+   INLINE MATH RESULTS (BASELINE & HORIZONTAL FLOW ALIGNMENT)
+   ========================================================================== */
+
+.inline-math-result {
+  position: absolute;
+  z-index: 15;
+  display: inline-flex;
+  align-items: baseline;
+  user-select: none;
+  pointer-events: auto;
+  line-height: 1;
+  animation: popInline 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popInline {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.handwritten-replica {
+  font-family: 'Caveat', 'Google Sans', cursive, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: baseline;
+  padding: 2px 6px;
+  border-radius: 6px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.handwritten-replica.num-val {
   color: var(--g-blue-light);
   background-color: rgba(138, 180, 248, 0.12);
 }
 
-.result-val.bool-true {
+.handwritten-replica.bool-true {
   color: #81c995; /* Google Green */
   background-color: rgba(129, 201, 149, 0.15);
 }
 
-.result-val.bool-false {
+.handwritten-replica.bool-false {
   color: #f28b82; /* Google Red */
   background-color: rgba(242, 139, 130, 0.15);
+}
+
+/* Margin Wrapping Sub-Line Style */
+.inline-math-result.wrapped-subline {
+  border-left: 2px solid var(--g-blue-light);
+  padding-left: 6px;
+}
+
+.indent-arrow {
+  color: var(--g-blue-light);
+  font-size: 0.8em;
+  margin-right: 4px;
+  opacity: 0.8;
+}
+
+.inline-remove-btn {
+  background: transparent;
+  border: none;
+  color: var(--g-text-dim);
+  cursor: pointer;
+  padding: 2px;
+  margin-left: 4px;
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
+}
+
+.inline-math-result:hover .inline-remove-btn {
+  display: inline-flex;
+}
+
+.inline-remove-btn:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ==========================================================================
+   SUGGEST RESULTS ACTION PILL
+   ========================================================================== */
+
+.suggest-action-pill {
+  position: absolute;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  background-color: var(--g-surface);
+  border: 1px solid var(--g-blue-light);
+  border-radius: 20px;
+  padding: 2px 4px 2px 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  animation: pulsePill 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes pulsePill {
+  from { opacity: 0; transform: scale(0.7); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.suggest-solve-btn {
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 6px;
+}
+
+.suggest-dot {
+  width: 7px;
+  height: 7px;
+  background-color: var(--g-blue-light);
+  border-radius: 50%;
+  animation: blink 1.2s infinite ease-in-out;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.suggest-label {
+  color: var(--g-text-muted);
+  font-size: 12px;
+}
+
+.suggest-value {
+  font-weight: 700;
+  color: var(--g-blue-light);
+}
+
+.suggest-value.text-true {
+  color: #81c995;
+}
+
+.suggest-value.text-false {
+  color: #f28b82;
+}
+
+.suggest-dismiss-btn {
+  background: transparent;
+  border: none;
+  color: var(--g-text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.suggest-dismiss-btn:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Floating Graph Card */
