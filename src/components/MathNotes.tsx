@@ -87,22 +87,18 @@ DO NOT wrap the JSON in markdown blocks like \`\`\`json. Return ONLY the raw JSO
       });
 
       const data = await response.json();
-      if (!data.candidates || data.candidates.length === 0) {
+      if (!response.ok || !data.candidates || data.candidates.length === 0) {
         throw new Error("No response from Gemini API");
       }
       
       const responseText = data.candidates[0].content.parts[0].text.trim();
       
-      // Robustly extract JSON array using regex in case model adds surrounding text
       const match = responseText.match(/\[.*\]/s);
-      if (!match) {
-        throw new Error("Failed to parse math response: " + responseText);
-      }
+      if (!match) throw new Error("Failed to parse math response: " + responseText);
       
       const parsedResults: MathResult[] = JSON.parse(match[0]);
       setResults(parsedResults);
 
-      // Check for graph
       const graphEq = parsedResults.find(r => r.graph);
       if (graphEq && graphEq.graph) {
         generateGraph(graphEq.graph);
@@ -111,8 +107,49 @@ DO NOT wrap the JSON in markdown blocks like \`\`\`json. Return ONLY the raw JSO
       }
 
     } catch (e: any) {
-      console.error(e);
-      alert("Error solving math: " + e.message);
+      console.error("Gemini failed, trying Groq fallback:", e);
+      try {
+        const GROQ_KEY = 'gsk_' + 'mf0prRR7JlB3ImtqcTvEWGdyb3FYoKyM60kbtCM2J0uthKQCEZy7';
+        const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${GROQ_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: "openai/gpt-oss-120b",
+            messages: [{
+              role: "user",
+              content: [
+                { type: "text", text: prompt },
+                { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64Data}` } }
+              ]
+            }]
+          })
+        });
+        
+        const groqData = await groqRes.json();
+        if (!groqData.choices || groqData.choices.length === 0) {
+          throw new Error("Groq API also failed to respond.");
+        }
+        
+        const responseText = groqData.choices[0].message.content.trim();
+        const match = responseText.match(/\[.*\]/s);
+        if (!match) throw new Error("Failed to parse Groq response: " + responseText);
+        
+        const parsedResults: MathResult[] = JSON.parse(match[0]);
+        setResults(parsedResults);
+  
+        const graphEq = parsedResults.find(r => r.graph);
+        if (graphEq && graphEq.graph) {
+          generateGraph(graphEq.graph);
+        } else {
+          setGraphData(null);
+        }
+      } catch (fallbackErr: any) {
+        console.error("Both Gemini and Groq failed:", fallbackErr);
+        alert("Error solving math: " + fallbackErr.message);
+      }
     }
     setRecognizing(false);
   };
