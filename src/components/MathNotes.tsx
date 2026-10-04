@@ -87,12 +87,19 @@ DO NOT wrap the JSON in markdown blocks like \`\`\`json. Return ONLY the raw JSO
       });
 
       const data = await response.json();
+      if (!data.candidates || data.candidates.length === 0) {
+        throw new Error("No response from Gemini API");
+      }
+      
       const responseText = data.candidates[0].content.parts[0].text.trim();
       
-      // Clean up potential markdown formatting if model didn't listen
-      const cleanJsonStr = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+      // Robustly extract JSON array using regex in case model adds surrounding text
+      const match = responseText.match(/\[.*\]/s);
+      if (!match) {
+        throw new Error("Failed to parse math response: " + responseText);
+      }
       
-      const parsedResults: MathResult[] = JSON.parse(cleanJsonStr);
+      const parsedResults: MathResult[] = JSON.parse(match[0]);
       setResults(parsedResults);
 
       // Check for graph
@@ -103,9 +110,9 @@ DO NOT wrap the JSON in markdown blocks like \`\`\`json. Return ONLY the raw JSO
         setGraphData(null);
       }
 
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      // Fallback or error message
+      alert("Error solving math: " + e.message);
     }
     setRecognizing(false);
   };
