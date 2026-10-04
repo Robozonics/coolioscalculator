@@ -410,10 +410,16 @@ export const AppleMathNotes: React.FC = () => {
       'AQ.Ab8RN6LP0yVkWdxB' + 'kpBAm-aBwmFJzEBlHwjwrb3ECuelml_Epg'
     ];
 
-    const promptText = `You are an iPadOS Math Notes solver.
-Extract and solve the mathematical equation or problem from this image.
+    const promptText = `You are an expert iPadOS Math Notes solver with a perfect mathematical record.
 Current known variables: ${JSON.stringify(symbolTable.map(s => ({ [s.name]: s.value })))}.
-Return JSON ONLY as an array: [{"original": "extracted_equation_here", "result": "answer_here"}]`;
+
+CRITICAL RULES:
+1. Extract the mathematical expression or equation from the image.
+2. ACCURATELY EVALUATE the math step-by-step internally.
+3. The "result" field MUST contain ONLY the final numerical evaluated answer (e.g., "60" or "x = 42"), NOT the original equation.
+4. Return ONLY a valid JSON array of objects, with NO markdown.
+
+Format: [{"original": "24 + 36 =", "result": "60"}]`;
 
     // Try Gemini First with Key Rotation
     for (const key of GEMINI_KEYS) {
@@ -479,10 +485,17 @@ Return JSON ONLY as an array: [{"original": "extracted_equation_here", "result":
 
           if (!results) {
             setStatusMessage('Solving via openai/gpt-oss-20b...');
-            const groqPrompt = `You are an iPadOS Math Notes OCR solver.
-Extract and solve the mathematical equation or problem from this OCR text: "${mathText}".
-Current known variables: ${JSON.stringify(symbolTable.map(s => ({ [s.name]: s.value })))}.
-Return JSON ONLY as an array: [{"original": "${mathText}", "result": "answer"}]`;
+            const groqPrompt = `You are an expert Math Notes OCR solver.
+OCR Text: "${mathText}".
+Current variables: ${JSON.stringify(symbolTable.map(s => ({ [s.name]: s.value })))}.
+
+CRITICAL RULES:
+1. Extract the mathematical expression from the OCR text.
+2. ACCURATELY EVALUATE the math step-by-step internally.
+3. The "result" field MUST contain ONLY the final numerical evaluated answer (e.g., "60"), NOT the original equation.
+4. Return ONLY a valid JSON array of objects, with NO markdown.
+
+Format: [{"original": "${mathText}", "result": "evaluated_answer"}]`;
 
             const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
               method: 'POST',
