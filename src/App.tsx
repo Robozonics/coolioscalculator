@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import './App.css';
-import { Calculator as CalcIcon, Pencil, ArrowLeftRight } from 'lucide-react';
+import { Calculator as CalcIcon, Pencil, ArrowLeftRight, Sparkles } from 'lucide-react';
 import BasicCalculator from './components/BasicCalculator';
 import { AppleMathNotes } from './components/AppleMathNotes';
 import UnitConverter from './components/UnitConverter';
+import { GenZCalculator } from './components/GenZCalculator';
 
-type Mode = 'calculator' | 'converter' | 'notes';
+type Mode = 'genz' | 'notes' | 'calculator' | 'converter';
 
 function App() {
-  const [mode, setMode] = useState<Mode>('notes'); // Default to Apple Math Notes
+  const [mode, setMode] = useState<Mode>('genz'); // Default to Ultra-Modern Gen Z Aesthetic Calculator
   const [showFloatMenu, setShowFloatMenu] = useState(false);
 
   return (
@@ -27,6 +28,15 @@ function App() {
 
         {/* Navigation Tabs */}
         <nav className="google-tabs">
+          <button 
+            className={`google-tab ${mode === 'genz' ? 'active' : ''}`}
+            onClick={() => setMode('genz')}
+            title="Gen Z Ultra-Modern Aesthetic Calculator"
+          >
+            <Sparkles size={16} color={mode === 'genz' ? '#B19CD9' : '#8e8e93'} />
+            <span>Aura (Gen Z)</span>
+          </button>
+
           <button 
             className={`google-tab ${mode === 'notes' ? 'active' : ''}`}
             onClick={() => setMode('notes')}
@@ -56,6 +66,7 @@ function App() {
       {/* Main Container */}
       <main className="google-main-content">
         <div className={`google-card-wrapper ${mode}`}>
+          {mode === 'genz' && <GenZCalculator />}
           {mode === 'notes' && <AppleMathNotes />}
           {mode === 'calculator' && <BasicCalculator />}
           {mode === 'converter' && <UnitConverter />}
@@ -75,6 +86,16 @@ function App() {
         {showFloatMenu && (
           <div className="ipados-float-popover">
             <div className="popover-title">Calculator Modes</div>
+            <button 
+              className={`popover-item ${mode === 'genz' ? 'active' : ''}`}
+              onClick={() => { setMode('genz'); setShowFloatMenu(false); }}
+            >
+              <Sparkles size={15} color="#B19CD9" />
+              <div className="item-text">
+                <span className="name">Aura (Gen Z)</span>
+                <span className="desc">Glassmorphic neon-pastel aesthetic</span>
+              </div>
+            </button>
             <button 
               className={`popover-item ${mode === 'notes' ? 'active' : ''}`}
               onClick={() => { setMode('notes'); setShowFloatMenu(false); }}
