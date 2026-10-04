@@ -1,27 +1,19 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import { 
-  PenTool, 
-  RotateCcw, 
-  Calculator, 
-  ChevronDown, 
-  ChevronRight, 
-  Variable, 
   Sparkles, 
-  Layers, 
-  CheckSquare, 
-  Square, 
-  Plus, 
-  Trash2, 
-  X,
-  Check,
-  Activity,
-  Sliders,
-  Grid,
-  Highlighter,
-  Eraser,
-  Copy,
-  TrendingUp
+  PenTool, 
+  Sliders, 
+  Variable, 
+  RotateCcw, 
+  Copy, 
+  Check, 
+  X, 
+  Type,
+  Plus,
+  Trash2,
+  Zap,
+  Activity
 } from 'lucide-react';
 import { mathEngine, type EvaluationResult } from '../engine/mathEngine';
 import { Graph2D } from './graphing/Graph2D';
@@ -30,13 +22,9 @@ import { Graph3D } from './graphing/Graph3D';
 const GEMINI_KEY = ["AQ.Ab8RN6LP0y", "VkWdxBkpBAm", "-aBwmFJz", "EBlHwjwrb3E", "Cuelml_Epg"].join('');
 const GROQ_KEY = 'gsk_' + 'mf0prRR7JlB3ImtqcTvEWGdyb3FYoKyM60kbtCM2J0uthKQCEZy7';
 
-interface DocumentBlock {
+interface MathLine {
   id: string;
-  type: 'heading' | 'text' | 'math' | 'checklist';
-  headingLevel?: 1 | 2 | 3;
-  content: string;
-  checked?: boolean;
-  collapsed?: boolean;
+  raw: string;
   evalResult?: EvaluationResult;
 }
 
@@ -47,228 +35,185 @@ interface HandwrittenItem {
   x: number;
   y: number;
   fontSize: number;
-  isWrapped: boolean;
-  status: 'suggested' | 'inserted';
-  graph2D?: any;
-  graph3D?: any;
 }
 
-type InputMode = 'split' | 'text' | 'canvas';
-type DisplayMode = 'insert' | 'suggest';
-type PaperStyle = 'grid' | 'lined' | 'blank';
-type ToolType = 'pen' | 'highlighter' | 'pencil' | 'eraser';
-
-export const TUTORIAL_PRESETS: Record<string, { label: string; icon: string; blocks: DocumentBlock[] }> = {
-  trip: {
-    label: 'Trip Budget',
+// Simple, curated futuristic presets
+export const FUTURISTIC_PRESETS = [
+  {
+    id: 'trip',
+    title: 'Trip Budget',
     icon: '🏖️',
-    blocks: [
-      { id: 't1', type: 'heading', headingLevel: 1, content: 'Vacation & Travel Budget (Tutorial Demo)' },
-      { id: 't2', type: 'text', content: 'As demonstrated in Apple Math Notes, variables propagate reactively downstream. Tap "Adjust" on nights or food to scrub values live:' },
-      { id: 't3', type: 'math', content: 'hotelPerNight = 180' },
-      { id: 't4', type: 'math', content: 'nights = 4' },
-      { id: 't5', type: 'math', content: 'foodDaily = 65' },
-      { id: 't6', type: 'math', content: 'flights = 320' },
-      { id: 't7', type: 'math', content: 'hotelTotal = hotelPerNight * nights =' },
-      { id: 't8', type: 'math', content: 'foodTotal = foodDaily * nights =' },
-      { id: 't9', type: 'math', content: 'tripTotal = hotelTotal + foodTotal + flights =' },
-      { id: 't10', type: 'checklist', content: 'Tap Adjust on "nights" or "foodDaily" to see tripTotal change instantly', checked: true }
+    lines: [
+      '# Vacation & Travel Model',
+      'hotelPerNight = 180',
+      'nights = 4',
+      'foodDaily = 65',
+      'flights = 320',
+      'tripTotal = (hotelPerNight * nights) + (foodDaily * nights) + flights ='
     ]
   },
-  geometry: {
-    label: 'Circle Geometry',
+  {
+    id: 'physics',
+    title: 'Quantum & Kinematics',
+    icon: '⚛️',
+    lines: [
+      '# Projectile & Energy',
+      'mass = 12.5',
+      'velocity = 4.2',
+      'kineticEnergy = 0.5 * mass * velocity^2 =',
+      'y = 2*x^2 - 4*x - 6'
+    ]
+  },
+  {
+    id: 'geometry',
+    title: 'Circle Geometry',
     icon: '📐',
-    blocks: [
-      { id: 'g1', type: 'heading', headingLevel: 1, content: 'Circle Geometry & Trigonometry' },
-      { id: 'g2', type: 'text', content: 'Define radius and calculate area, circumference, and volume with built-in constants (pi, e):' },
-      { id: 'g3', type: 'math', content: 'radius = 7' },
-      { id: 'g4', type: 'math', content: 'area = pi * radius^2 =' },
-      { id: 'g5', type: 'math', content: 'circumference = 2 * pi * radius =' },
-      { id: 'g6', type: 'math', content: 'sphereVolume = (4/3) * pi * radius^3 =' },
-      { id: 'g7', type: 'math', content: 'cos(pi) =' },
-      { id: 'g8', type: 'checklist', content: 'Scrub radius slider from 7 to 15 to observe reactive updates', checked: false }
+    lines: [
+      '# Orbit Geometry',
+      'radius = 7',
+      'area = pi * radius^2 =',
+      'circumference = 2 * pi * radius =',
+      'volume = (4/3) * pi * radius^3 ='
     ]
   },
-  physics: {
-    label: 'Physics & Graphs',
-    icon: '📈',
-    blocks: [
-      { id: 'p1', type: 'heading', headingLevel: 1, content: 'Physics & Function Models' },
-      { id: 'p2', type: 'text', content: 'Kinematics formulas and dynamic 2D parabola / 3D surface graphs:' },
-      { id: 'p3', type: 'math', content: 'mass = 12.5' },
-      { id: 'p4', type: 'math', content: 'velocity = 4.2' },
-      { id: 'p5', type: 'math', content: 'kineticEnergy = 0.5 * mass * velocity^2 =' },
-      { id: 'p6', type: 'heading', headingLevel: 2, content: 'Dynamic Function Models' },
-      { id: 'p7', type: 'math', content: 'y = 2*x^2 - 4*x - 6' },
-      { id: 'p8', type: 'math', content: 'z = sin(x) * cos(y)' }
-    ]
-  },
-  column: {
-    label: 'Column Math & Logic',
-    icon: '🧮',
-    blocks: [
-      { id: 'c1', type: 'heading', headingLevel: 1, content: 'Column Summation, Logic & Units' },
-      { id: 'c2', type: 'text', content: 'Vertical column addition (drawing a line under numbers) and boolean verifications:' },
-      { id: 'c3', type: 'math', content: '145\n+ 280\n+  75\n-----' },
-      { id: 'c4', type: 'heading', headingLevel: 2, content: 'Logical Truth Verifications' },
-      { id: 'c5', type: 'math', content: '7 = 9' },
-      { id: 'c6', type: 'math', content: '12 * 12 = 144' },
-      { id: 'c7', type: 'math', content: '15 > 8' },
-      { id: 'c8', type: 'math', content: '4 in {1, 2, 4, 8}' },
-      { id: 'c9', type: 'heading', headingLevel: 2, content: 'Inline Unit Conversions' },
-      { id: 'c10', type: 'math', content: '50 m in ft =' },
-      { id: 'c11', type: 'math', content: '100 degC in degF =' },
-      { id: 'c12', type: 'math', content: '75 kg in lb =' }
+  {
+    id: 'units',
+    title: 'Units & Logic',
+    icon: '⚡',
+    lines: [
+      '# Multi-Unit Conversions & Truth',
+      '50 m in ft =',
+      '100 degC in degF =',
+      '7 = 9',
+      '12 * 12 = 144'
     ]
   }
-};
+];
 
-export const AppleMathNotes = () => {
-  const [activePresetKey, setActivePresetKey] = useState<string>('physics');
-  const [blocks, setBlocks] = useState<DocumentBlock[]>(TUTORIAL_PRESETS.physics.blocks);
-  const [inputMode, setInputMode] = useState<InputMode>('split');
-  const [displayMode, setDisplayMode] = useState<DisplayMode>('insert');
-  const [showSymbolInspector, setShowSymbolInspector] = useState(false);
-  const [paperStyle, setPaperStyle] = useState<PaperStyle>('grid');
-  const [activeTool, setActiveTool] = useState<ToolType>('pen');
-  const [activePenColor, setActivePenColor] = useState('#ff9f0a'); // Apple Notes signature amber
-  const [penStrokeWidth, setPenStrokeWidth] = useState(2.5);
-  const [activeScrubberBlockId, setActiveScrubberBlockId] = useState<string | null>(null);
-  const [expandedGraphs, setExpandedGraphs] = useState<Record<string, boolean>>({ p7: true, p8: true });
+export const AppleMathNotes: React.FC = () => {
+  // Mode: 'type' (Smart Pad) or 'draw' (Neon Stylus Canvas)
+  const [mode, setMode] = useState<'type' | 'draw'>('type');
+  
+  // Lines state for Smart Pad
+  const [lines, setLines] = useState<MathLine[]>([
+    { id: 'l1', raw: '# Cybernetic Math Notes' },
+    { id: 'l2', raw: 'mass = 12.5' },
+    { id: 'l3', raw: 'velocity = 4.2' },
+    { id: 'l4', raw: 'kineticEnergy = 0.5 * mass * velocity^2 =' },
+    { id: 'l5', raw: 'y = 2*x^2 - 4*x - 6' },
+    { id: 'l6', raw: '50 m in ft =' },
+    { id: 'l7', raw: '7 = 9' }
+  ]);
+
+  const [activeScrubberLineId, setActiveScrubberLineId] = useState<string | null>(null);
+  const [showVariableHUD, setShowVariableHUD] = useState(false);
   const [copiedNotification, setCopiedNotification] = useState<string | null>(null);
 
-  // Handwritten Canvas State
+  // Handwritten Stylus Canvas State
   const sigPadRef = useRef<SignatureCanvas>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const [handwrittenItems, setHandwrittenItems] = useState<HandwrittenItem[]>([]);
-  const [isSolvingHandwriting, setIsSolvingHandwriting] = useState(false);
-  const [statusNotice, setStatusNotice] = useState<string>('');
+  const [isSolving, setIsSolving] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
+  const [activePenColor, setActivePenColor] = useState('#00f2fe'); // Futuristic Electric Cyan
 
-  // 1. Reactive Re-evaluation Loop for Document Text Blocks
+  // Live Reactive Evaluation Engine for Lines
   useEffect(() => {
     mathEngine.reset();
 
-    const evaluatedBlocks = blocks.map((b, idx) => {
-      if (b.type === 'math') {
-        const res = mathEngine.evaluateLine(b.content, idx);
-        return { ...b, evalResult: res };
+    const evaluated = lines.map((line, idx) => {
+      const clean = line.raw.trim();
+      if (!clean || clean.startsWith('#') || clean.startsWith('//')) {
+        return { ...line, evalResult: undefined };
       }
-      return b;
+      const res = mathEngine.evaluateLine(clean, idx);
+      return { ...line, evalResult: res };
     });
 
-    const hasChanged = evaluatedBlocks.some((b, i) => {
-      if (b.type !== 'math') return false;
-      const prev = blocks[i].evalResult;
-      const next = b.evalResult;
-      return !prev || prev.evaluated !== next?.evaluated || prev.error !== next?.error;
+    const changed = evaluated.some((item, i) => {
+      const prev = lines[i]?.evalResult;
+      const next = item.evalResult;
+      return prev?.evaluated !== next?.evaluated || prev?.error !== next?.error;
     });
 
-    if (hasChanged) {
-      setBlocks(evaluatedBlocks);
+    if (changed) {
+      setLines(evaluated);
     }
-  }, [blocks.map(b => b.content).join(';;')]);
+  }, [lines.map(l => l.raw).join(';;')]);
 
-  // Live Symbol Table Snapshot
+  // Symbol Table Snapshot
   const symbolTable = useMemo(() => {
     return Array.from(mathEngine.getSymbolTable().values()).filter(s => s.order >= 0);
-  }, [blocks]);
+  }, [lines]);
 
-  // Block Content Handlers
-  const updateBlockContent = (id: string, newContent: string) => {
-    setBlocks(prev => prev.map(b => b.id === id ? { ...b, content: newContent } : b));
+  // Handlers
+  const updateLineRaw = (id: string, newRaw: string) => {
+    setLines(prev => prev.map(l => l.id === id ? { ...l, raw: newRaw } : l));
   };
 
-  const updateVariableValue = (blockId: string, varName: string, newVal: number) => {
-    setBlocks(prev => prev.map(b => {
-      if (b.id === blockId) {
-        return { ...b, content: `${varName} = ${newVal}` };
-      }
-      return b;
-    }));
-  };
-
-  const toggleGraphExpansion = (blockId: string) => {
-    setExpandedGraphs(prev => ({ ...prev, [blockId]: !prev[blockId] }));
-  };
-
-  const toggleChecklist = (id: string) => {
-    setBlocks(prev => prev.map(b => b.id === id ? { ...b, checked: !b.checked } : b));
-  };
-
-  const toggleHeadingCollapse = (index: number) => {
-    setBlocks(prev => {
-      const next = [...prev];
-      const target = next[index];
-      if (target.type !== 'heading') return prev;
-
-      const newCollapsed = !target.collapsed;
-      target.collapsed = newCollapsed;
-
-      for (let i = index + 1; i < next.length; i++) {
-        if (next[i].type === 'heading' && (next[i].headingLevel || 1) <= (target.headingLevel || 1)) {
-          break;
-        }
-        next[i].collapsed = newCollapsed;
-      }
-      return next;
-    });
-  };
-
-  const addBlock = (type: DocumentBlock['type'], afterId?: string) => {
-    const newBlock: DocumentBlock = {
-      id: `block-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-      type,
-      headingLevel: type === 'heading' ? 2 : undefined,
-      content: type === 'math' ? 'radius = 10' : type === 'checklist' ? 'New task' : 'New paragraph',
-      checked: false
+  const addLine = (afterId?: string) => {
+    const newLine: MathLine = {
+      id: `line-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      raw: ''
     };
-
-    setBlocks(prev => {
-      if (!afterId) return [...prev, newBlock];
-      const idx = prev.findIndex(b => b.id === afterId);
-      if (idx === -1) return [...prev, newBlock];
+    setLines(prev => {
+      if (!afterId) return [...prev, newLine];
+      const idx = prev.findIndex(l => l.id === afterId);
+      if (idx === -1) return [...prev, newLine];
       const copy = [...prev];
-      copy.splice(idx + 1, 0, newBlock);
+      copy.splice(idx + 1, 0, newLine);
       return copy;
     });
   };
 
-  const deleteBlock = (id: string) => {
-    setBlocks(prev => prev.filter(b => b.id !== id));
+  const removeLine = (id: string) => {
+    if (lines.length <= 1) {
+      setLines([{ id: `line-${Date.now()}`, raw: '' }]);
+      return;
+    }
+    setLines(prev => prev.filter(l => l.id !== id));
   };
 
-  const copyToClipboard = (text: string) => {
+  const updateVariable = (lineId: string, varName: string, val: number) => {
+    setLines(prev => prev.map(l => {
+      if (l.id === lineId) {
+        return { ...l, raw: `${varName} = ${val}` };
+      }
+      return l;
+    }));
+  };
+
+  const copyAnswer = (text: string) => {
     navigator.clipboard?.writeText(text);
-    setCopiedNotification(`Copied "${text}"`);
+    setCopiedNotification(`Copied ${text} ✨`);
     setTimeout(() => setCopiedNotification(null), 1800);
   };
 
-  const loadPreset = (presetKey: string) => {
-    setActivePresetKey(presetKey);
-    const preset = TUTORIAL_PRESETS[presetKey];
-    if (preset) {
-      setBlocks(preset.blocks);
-      setExpandedGraphs({ p7: true, p8: true });
-      setActiveScrubberBlockId(null);
-    }
+  const loadPreset = (presetId: string) => {
+    const preset = FUTURISTIC_PRESETS.find(p => p.id === presetId);
+    if (!preset) return;
+    setLines(preset.lines.map((raw, idx) => ({ id: `p-${idx}-${Date.now()}`, raw })));
+    setActiveScrubberLineId(null);
   };
 
-  // Apple Pencil Handwriting Demo Simulation
+  // Futuristic Stylus: Simulate Apple Pencil Demo
   const drawSampleHandwriting = () => {
-    if (!sigPadRef.current || !canvasContainerRef.current) return;
+    if (!sigPadRef.current) return;
     const canvas = sigPadRef.current.getCanvas();
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     sigPadRef.current.clear();
     setHandwrittenItems([]);
-    setStatusNotice('Simulating Apple Pencil stroke & calculating...');
+    setStatusMessage('Simulating neural pencil stroke...');
 
     ctx.save();
     ctx.strokeStyle = activePenColor;
     ctx.lineWidth = 3.5;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
+    ctx.shadowColor = activePenColor;
+    ctx.shadowBlur = 12;
 
     const startX = 60;
     const startY = 120;
@@ -330,21 +275,18 @@ export const AppleMathNotes = () => {
           result: '60',
           x: startX + 236,
           y: startY + 28,
-          fontSize: 34,
-          isWrapped: false,
-          status: displayMode === 'insert' ? 'inserted' : 'suggested'
+          fontSize: 34
         }
       ]);
-      setStatusNotice('');
+      setStatusMessage('');
     }, 450);
   };
 
-  // Handwritten Vector Ingestion & OCR/Vision Evaluation
-  const evaluateHandwriting = async () => {
+  // Solve handwritten canvas strokes
+  const solveHandwriting = async () => {
     if (!sigPadRef.current || sigPadRef.current.isEmpty() || !canvasContainerRef.current) return;
-
-    setIsSolvingHandwriting(true);
-    setStatusNotice('Parsing handwriting vectors & context...');
+    setIsSolving(true);
+    setStatusMessage('Neural vision engine parsing math...');
 
     const canvas = sigPadRef.current.getCanvas();
     const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
@@ -352,22 +294,15 @@ export const AppleMathNotes = () => {
     const containerW = canvasContainerRef.current.offsetWidth || 500;
     const containerH = canvasContainerRef.current.offsetHeight || 500;
 
-    const prompt = `You are Apple iPadOS Math Notes OCR and math parsing engine.
-Extract all handwritten math equations, inequalities, assignments, logic expressions, and vertical column math (stacked numbers with a horizontal underline).
+    const prompt = `You are a futuristic Math Notes OCR engine.
+Extract all handwritten math equations, inequalities, assignments, and logic expressions.
 Evaluate each expression using current symbol context.
-For each expression, return:
-- "original": text representation (e.g. "radius = 14", "7=9", "y = sin(x)", or "120 + 350")
-- "result": computed answer or boolean ("14", "false", "28.5", "470")
-- "equals_x_percent": 0 to 100 percentage from left of canvas where the '=' sign or underline ends
-- "equals_y_percent": 0 to 100 percentage from top of canvas where the '=' sign or underline is located
-- "height_percent": 0 to 100 percentage height of the handwriting
-Return raw JSON array:
+For each expression, return raw JSON array:
 [
   { "original": "radius = 14", "result": "14", "equals_x_percent": 60, "equals_y_percent": 25, "height_percent": 8 }
 ]`;
 
     let results: any[] | null = null;
-
     try {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_KEY}`, {
         method: 'POST',
@@ -406,666 +341,356 @@ Return raw JSON array:
           if (match) results = JSON.parse(match[0]);
         }
       } catch (e) {
-        console.error("OCR Fallback failed:", e);
+        console.error("OCR fallback error:", e);
       }
     }
 
     if (results && Array.isArray(results) && results.length > 0) {
-      const processed: HandwrittenItem[] = results.map((item, idx) => {
-        const rawX = item.equals_x_percent ? (item.equals_x_percent / 100) * containerW : containerW * 0.55;
-        const rawY = item.equals_y_percent ? (item.equals_y_percent / 100) * containerH : containerH * 0.35;
-        const boxH = item.height_percent ? (item.height_percent / 100) * containerH : 40;
-        const fontSize = Math.max(26, Math.min(46, Math.round(boxH * 0.8)));
-
-        const rightMargin = containerW - 25;
-        const estimatedW = (String(item.result).length + 2) * (fontSize * 0.65) + 20;
-
-        let finalX = rawX + 10;
-        let finalY = rawY;
-        let isWrapped = false;
-
-        if (finalX + estimatedW > rightMargin) {
-          isWrapped = true;
-          finalY = rawY + fontSize + 8;
-          finalX = Math.max(25, Math.min(rawX - 25, rightMargin - estimatedW));
-        }
-
-        const evalLine = mathEngine.evaluateLine(item.original);
-
+      const items: HandwrittenItem[] = results.map((item, idx) => {
+        const x = item.equals_x_percent ? (item.equals_x_percent / 100) * containerW : containerW * 0.55;
+        const y = item.equals_y_percent ? (item.equals_y_percent / 100) * containerH : containerH * 0.35;
+        const boxH = item.height_percent ? (item.height_percent / 100) * containerH : 38;
         return {
           id: `hw-${idx}-${Date.now()}`,
           original: item.original,
           result: String(item.result),
-          x: Math.round(finalX),
-          y: Math.round(finalY),
-          fontSize,
-          isWrapped,
-          status: displayMode === 'insert' ? 'inserted' : 'suggested',
-          graph2D: evalLine.graph2D,
-          graph3D: evalLine.graph3D
+          x: Math.round(x + 10),
+          y: Math.round(y),
+          fontSize: Math.max(24, Math.min(42, Math.round(boxH * 0.85)))
         };
       });
-
-      setHandwrittenItems(processed);
-      setStatusNotice('');
+      setHandwrittenItems(items);
+      setStatusMessage('');
     } else {
-      setStatusNotice('No distinct equations recognized. Try writing clearly.');
+      setStatusMessage('No distinct equation detected. Try writing clearly.');
     }
-
-    setIsSolvingHandwriting(false);
+    setIsSolving(false);
   };
 
-  const clearCanvas = () => {
+  const clearDrawCanvas = () => {
     sigPadRef.current?.clear();
     setHandwrittenItems([]);
-    setStatusNotice('');
+    setStatusMessage('');
   };
 
-  // Adjust active tool settings
-  const penColor = activeTool === 'highlighter' 
-    ? 'rgba(255, 214, 10, 0.45)' 
-    : activeTool === 'eraser' 
-    ? '#1c1c1e' 
-    : activePenColor;
-
-  const penWidth = activeTool === 'highlighter'
-    ? 16
-    : activeTool === 'eraser'
-    ? 24
-    : penStrokeWidth;
-
   return (
-    <div className="apple-math-notes-root">
-      {/* Top Apple Notes Toolbar */}
-      <div className="apple-notes-header">
-        <div className="header-left">
-          <div className="apple-icon-badge">
-            <PenTool size={18} color="#ffffff" />
-          </div>
-          <div className="header-titles">
-            <span className="apple-app-title">Apple Math Notes</span>
-            <span className="apple-app-subtitle">Stateful Multi-Modal Math & Computational Engine</span>
-          </div>
-        </div>
-
-        <div className="header-center">
-          <div className="apple-segmented-control">
-            <button 
-              className={`apple-segment ${inputMode === 'split' ? 'active' : ''}`}
-              onClick={() => setInputMode('split')}
-              title="Split View: Document & Canvas"
-            >
-              <Layers size={14} />
-              <span>Split View</span>
-            </button>
-            <button 
-              className={`apple-segment ${inputMode === 'text' ? 'active' : ''}`}
-              onClick={() => setInputMode('text')}
-              title="Document Stream View"
-            >
-              <span>Document</span>
-            </button>
-            <button 
-              className={`apple-segment ${inputMode === 'canvas' ? 'active' : ''}`}
-              onClick={() => setInputMode('canvas')}
-              title="Handwriting Canvas View"
-            >
-              <span>Canvas</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="header-right">
-          {/* Results Mode */}
-          <div className="apple-mode-chip">
-            <span className="chip-label">Results:</span>
-            <button 
-              className={`chip-btn ${displayMode === 'insert' ? 'active' : ''}`}
-              onClick={() => setDisplayMode('insert')}
-              title="Insert: Automatic inline"
-            >
-              Insert
-            </button>
-            <button 
-              className={`chip-btn ${displayMode === 'suggest' ? 'active' : ''}`}
-              onClick={() => setDisplayMode('suggest')}
-              title="Suggest: Action pill"
-            >
-              Suggest
-            </button>
-          </div>
-
-          {/* Symbol Inspector Button */}
-          <button 
-            className={`apple-action-icon-btn ${showSymbolInspector ? 'active' : ''}`}
-            onClick={() => setShowSymbolInspector(!showSymbolInspector)}
-            title="Inspect Symbol Table & Reactive DAG"
-          >
-            <Variable size={16} />
-            <span className="var-count-badge">{symbolTable.length}</span>
-          </button>
-        </div>
-      </div>
-
+    <div className="futuristic-math-notes-root">
+      {/* Toast Notification */}
       {copiedNotification && (
-        <div className="copied-toast">
-          <Check size={14} />
+        <div className="futuristic-toast">
+          <Check size={14} color="#00f2fe" />
           <span>{copiedNotification}</span>
         </div>
       )}
 
-      {/* Main Dual-Stream Document Workspace */}
-      <div className={`apple-workspace ${inputMode}`}>
+      {/* Top Futuristic Header */}
+      <header className="futuristic-header">
+        <div className="f-header-left">
+          <div className="f-glow-badge">
+            <Zap size={16} color="#00f2fe" />
+          </div>
+          <div className="f-title-group">
+            <span className="f-title">Cyber Math Notes</span>
+            <span className="f-subtitle">Neural Reactive Engine</span>
+          </div>
+        </div>
+
+        {/* Quick Demos Bar */}
+        <div className="f-presets-chips">
+          {FUTURISTIC_PRESETS.map(p => (
+            <button key={p.id} className="f-preset-chip" onClick={() => loadPreset(p.id)}>
+              <span>{p.icon}</span>
+              <span className="p-title">{p.title}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Top Controls */}
+        <div className="f-header-right">
+          {/* Mode Switcher: Type vs Draw */}
+          <div className="f-mode-pill-toggle">
+            <button 
+              className={`f-mode-btn ${mode === 'type' ? 'active' : ''}`}
+              onClick={() => setMode('type')}
+              title="Smart Pad Mode"
+            >
+              <Type size={14} />
+              <span>Type</span>
+            </button>
+            <button 
+              className={`f-mode-btn ${mode === 'draw' ? 'active' : ''}`}
+              onClick={() => setMode('draw')}
+              title="Neon Stylus Mode"
+            >
+              <PenTool size={14} />
+              <span>Draw</span>
+            </button>
+          </div>
+
+          {/* Variables HUD Toggle */}
+          <button 
+            className={`f-icon-pill ${showVariableHUD ? 'active' : ''}`}
+            onClick={() => setShowVariableHUD(!showVariableHUD)}
+            title="Inspect Reactive Symbol Variables"
+          >
+            <Variable size={15} />
+            <span className="hud-badge">{symbolTable.length}</span>
+          </button>
+        </div>
+      </header>
+
+      {/* Main Unified Pad Surface */}
+      <main className="futuristic-main-surface">
         
-        {/* Stream B: Rich Text Document Stream */}
-        {(inputMode === 'split' || inputMode === 'text') && (
-          <div className="document-stream-pane">
-            <div className="stream-header">
-              <div className="stream-header-top">
-                <div className="stream-title-group">
-                  <span className="stream-title">Digital Document Stream</span>
-                  <span className="stream-badge">{blocks.length} blocks</span>
-                </div>
-                <div className="add-block-actions">
-                  <button className="add-chip" onClick={() => addBlock('math')}>
-                    <Plus size={12} /> Math
-                  </button>
-                  <button 
-                    className="add-chip" 
-                    onClick={() => {
-                      const colBlock: DocumentBlock = {
-                        id: `col-${Date.now()}`,
-                        type: 'math',
-                        content: '145\n+ 280\n+  75\n-----'
-                      };
-                      setBlocks(prev => [...prev, colBlock]);
-                    }}
-                    title="Insert Column Arithmetic with Horizontal Line"
-                  >
-                    <Plus size={12} /> Column Sum
-                  </button>
-                  <button className="add-chip" onClick={() => addBlock('text')}>
-                    <Plus size={12} /> Text
-                  </button>
-                  <button className="add-chip" onClick={() => addBlock('checklist')}>
-                    <Plus size={12} /> Task
-                  </button>
-                  <button className="add-chip" onClick={() => addBlock('heading')}>
-                    <Plus size={12} /> Heading
-                  </button>
-                </div>
-              </div>
-
-              {/* Step-by-Step Tutorial Presets Row */}
-              <div className="preset-scenarios-row">
-                <span className="preset-label">Tutorial Scenarios:</span>
-                {Object.entries(TUTORIAL_PRESETS).map(([key, item]) => (
-                  <button
-                    key={key}
-                    className={`preset-pill ${activePresetKey === key ? 'active' : ''}`}
-                    onClick={() => loadPreset(key)}
-                    title={`Load ${item.label}`}
-                  >
-                    <span className="preset-icon">{item.icon}</span>
-                    <span className="preset-name">{item.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="document-blocks-container">
-              {blocks.map((block, idx) => {
-                if (block.collapsed && block.type !== 'heading') return null;
-
-                const isAssignmentNum = block.evalResult?.isAssignment && typeof block.evalResult.assignedVal === 'number';
-                const isGraphable = block.evalResult?.isGraphable2D || block.evalResult?.isGraphable3D;
+        {/* MODE A: Smart Typed Pad */}
+        {mode === 'type' && (
+          <div className="f-pad-container">
+            <div className="f-lines-scroll-area">
+              {lines.map((line, idx) => {
+                const isHeading = line.raw.trim().startsWith('#');
+                const isAssignmentNum = line.evalResult?.isAssignment && typeof line.evalResult.assignedVal === 'number';
+                const isGraphable2D = line.evalResult?.isGraphable2D && line.evalResult.graph2D;
+                const isGraphable3D = line.evalResult?.isGraphable3D && line.evalResult.graph3D;
 
                 return (
-                  <div key={block.id} className={`doc-block block-${block.type}`}>
-                    {/* Headings */}
-                    {block.type === 'heading' && (
-                      <div className="heading-block-wrapper">
+                  <div key={line.id} className={`f-line-row ${isHeading ? 'is-heading' : ''}`}>
+                    {/* Line Index or Bullet */}
+                    <span className="f-line-num">{idx + 1}</span>
+
+                    {/* Input Field */}
+                    <div className="f-input-wrapper">
+                      <input 
+                        type="text"
+                        className={`f-line-input ${isHeading ? 'heading-font' : ''}`}
+                        value={line.raw}
+                        onChange={(e) => updateLineRaw(line.id, e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addLine(line.id);
+                          }
+                          if (e.key === 'Backspace' && line.raw === '' && lines.length > 1) {
+                            e.preventDefault();
+                            removeLine(line.id);
+                          }
+                        }}
+                        placeholder={isHeading ? 'Section Header' : 'Type math equation, e.g. mass = 12.5 or y = 2*x^2 - 4'}
+                      />
+
+                      {/* Interactive Scrubber Pill for Numbers */}
+                      {isAssignmentNum && (
                         <button 
-                          className="collapse-toggle-btn"
-                          onClick={() => toggleHeadingCollapse(idx)}
-                          title="Collapse/Expand Section"
+                          className={`f-scrubber-pill ${activeScrubberLineId === line.id ? 'active' : ''}`}
+                          onClick={() => setActiveScrubberLineId(activeScrubberLineId === line.id ? null : line.id)}
+                          title="Tweak value with slider"
                         >
-                          {block.collapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
+                          <Sliders size={12} />
+                          <span>Adjust</span>
                         </button>
-                        <input 
-                          type="text" 
-                          className={`heading-input level-${block.headingLevel || 1}`}
-                          value={block.content}
-                          onChange={(e) => updateBlockContent(block.id, e.target.value)}
-                        />
-                        <button className="block-delete-btn" onClick={() => deleteBlock(block.id)}>
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    )}
+                      )}
 
-                    {/* Standard Text Paragraph */}
-                    {block.type === 'text' && (
-                      <div className="text-block-wrapper">
-                        <textarea 
-                          rows={2}
-                          className="text-input"
-                          value={block.content}
-                          onChange={(e) => updateBlockContent(block.id, e.target.value)}
-                        />
-                        <button className="block-delete-btn" onClick={() => deleteBlock(block.id)}>
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Checklists */}
-                    {block.type === 'checklist' && (
-                      <div className="checklist-block-wrapper">
-                        <button className="check-btn" onClick={() => toggleChecklist(block.id)}>
-                          {block.checked ? <CheckSquare size={16} color="#34c759" /> : <Square size={16} color="#8e8e93" />}
-                        </button>
-                        <input 
-                          type="text" 
-                          className={`checklist-input ${block.checked ? 'completed' : ''}`}
-                          value={block.content}
-                          onChange={(e) => updateBlockContent(block.id, e.target.value)}
-                        />
-                        <button className="block-delete-btn" onClick={() => deleteBlock(block.id)}>
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Inline Math Block with Scrubber & Dynamic Graphs */}
-                    {block.type === 'math' && (
-                      <div className="math-block-wrapper">
-                        <div className="math-input-row">
-                          <input 
-                            type="text" 
-                            className="math-code-input"
-                            value={block.content}
-                            onChange={(e) => updateBlockContent(block.id, e.target.value)}
-                            placeholder="Type math, e.g. mass = 12.5 or kineticEnergy ="
-                          />
-
-                          {/* Scrubber Toggle Pill for Number Variables */}
-                          {isAssignmentNum && (
-                            <button 
-                              className={`scrubber-toggle-chip ${activeScrubberBlockId === block.id ? 'active' : ''}`}
-                              onClick={() => setActiveScrubberBlockId(activeScrubberBlockId === block.id ? null : block.id)}
-                              title="Adjust Variable Value Scrubber"
-                            >
-                              <Sliders size={12} />
-                              <span>Adjust</span>
-                            </button>
-                          )}
-
-                          {/* Contextual Insert Graph Pill */}
-                          {isGraphable && (
-                            <button 
-                              className={`insert-graph-chip ${expandedGraphs[block.id] ? 'active' : ''}`}
-                              onClick={() => toggleGraphExpansion(block.id)}
-                              title="Toggle Interactive Graph"
-                            >
-                              <TrendingUp size={12} />
-                              <span>{expandedGraphs[block.id] ? 'Hide Graph' : 'Insert Graph'}</span>
-                            </button>
-                          )}
-
-                          {/* Inline Answer Anchor with Baseline Matching */}
-                          {block.evalResult && (
-                            <div className="inline-eval-anchor">
-                              {block.evalResult.error ? (
-                                <span className="inline-error-badge">
-                                  {block.evalResult.error}
-                                </span>
-                              ) : isGraphable ? (
-                                <span className="inline-graph-indicator">
-                                  <Sparkles size={13} />
-                                  <span>{block.evalResult.evaluated}</span>
-                                </span>
-                              ) : displayMode === 'suggest' ? (
-                                <div className="suggest-pill-mini">
-                                  <span className="dot"></span>
-                                  <span>Solve: {block.evalResult.evaluated}</span>
-                                </div>
-                              ) : (
-                                <div 
-                                  className="immediate-answer-pill"
-                                  onClick={() => copyToClipboard(block.evalResult!.evaluated)}
-                                  title="Click to copy answer"
-                                >
-                                  <span className="equals-symbol">=</span>
-                                  <span className={`answer-value ${block.evalResult.evaluated === 'true' ? 'text-true' : block.evalResult.evaluated === 'false' ? 'text-false' : ''}`}>
-                                    {block.evalResult.evaluated}
-                                  </span>
-                                  <Copy size={11} className="copy-icon" />
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          <button className="block-delete-btn" onClick={() => deleteBlock(block.id)}>
-                            <Trash2 size={13} />
-                          </button>
+                      {/* Holographic Inline Answer Badge */}
+                      {line.evalResult?.evaluated && !isHeading && (
+                        <div 
+                          className="f-holo-answer-badge"
+                          onClick={() => copyAnswer(line.evalResult!.evaluated)}
+                          title="Click to copy answer"
+                        >
+                          <span className="holo-eq">=</span>
+                          <span className={`holo-val ${line.evalResult.evaluated === 'true' ? 'val-true' : line.evalResult.evaluated === 'false' ? 'val-false' : ''}`}>
+                            {line.evalResult.evaluated}
+                          </span>
+                          <Copy size={11} className="holo-copy-icon" />
                         </div>
+                      )}
 
-                        {/* Interactive Scrubber Slider Bar (iPadOS Adjust Value feature) */}
-                        {isAssignmentNum && activeScrubberBlockId === block.id && (
-                          <div className="interactive-scrubber-bar">
-                            <span className="scrubber-var-name">{block.evalResult!.assignedVar}:</span>
-                            <button 
-                              className="scrubber-step-btn"
-                              onClick={() => {
-                                const current = Number(block.evalResult!.assignedVal) || 0;
-                                updateVariableValue(block.id, block.evalResult!.assignedVar!, Number((current - 1).toFixed(1)));
-                              }}
-                            >
-                              -
-                            </button>
-                            <input 
-                              type="range"
-                              min={0}
-                              max={Math.max(100, Math.round((Number(block.evalResult!.assignedVal) || 10) * 2.5))}
-                              step={0.5}
-                              value={Number(block.evalResult!.assignedVal) || 0}
-                              onChange={(e) => updateVariableValue(block.id, block.evalResult!.assignedVar!, parseFloat(e.target.value))}
-                              className="scrubber-range-slider"
-                            />
-                            <button 
-                              className="scrubber-step-btn"
-                              onClick={() => {
-                                const current = Number(block.evalResult!.assignedVal) || 0;
-                                updateVariableValue(block.id, block.evalResult!.assignedVar!, Number((current + 1).toFixed(1)));
-                              }}
-                            >
-                              +
-                            </button>
-                            <span className="scrubber-val-display">
-                              {Number(block.evalResult!.assignedVal).toFixed(1)}
-                            </span>
-                          </div>
-                        )}
+                      {/* Line Delete Button */}
+                      <button className="f-line-del-btn" onClick={() => removeLine(line.id)} title="Delete line">
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
 
-                        {/* Interactive Graph Embeds */}
-                        {block.evalResult?.isGraphable2D && block.evalResult.graph2D && expandedGraphs[block.id] !== false && (
-                          <div className="embedded-graph-container">
-                            <Graph2D 
-                              functions={block.evalResult.graph2D.functions}
-                              title={`${block.evalResult.graph2D.dependentVar}(${block.evalResult.graph2D.independentVar})`}
-                            />
-                          </div>
-                        )}
+                    {/* Interactive Value Scrubber Slider */}
+                    {isAssignmentNum && activeScrubberLineId === line.id && (
+                      <div className="f-scrubber-glow-slider">
+                        <span className="scrubber-label">{line.evalResult!.assignedVar}:</span>
+                        <input 
+                          type="range"
+                          min={0}
+                          max={Math.max(100, Math.round((Number(line.evalResult!.assignedVal) || 10) * 2.5))}
+                          step={0.5}
+                          value={Number(line.evalResult!.assignedVal) || 0}
+                          onChange={(e) => updateVariable(line.id, line.evalResult!.assignedVar!, parseFloat(e.target.value))}
+                          className="scrubber-range"
+                        />
+                        <span className="scrubber-current-num">
+                          {Number(line.evalResult!.assignedVal).toFixed(1)}
+                        </span>
+                      </div>
+                    )}
 
-                        {block.evalResult?.isGraphable3D && block.evalResult.graph3D && expandedGraphs[block.id] !== false && (
-                          <div className="embedded-graph-container">
-                            <Graph3D 
-                              expr={block.evalResult.graph3D.expression}
-                              varX={block.evalResult.graph3D.varX}
-                              varY={block.evalResult.graph3D.varY}
-                              dependentVar={block.evalResult.graph3D.dependentVar}
-                            />
-                          </div>
-                        )}
+                    {/* Dynamic Holographic Graph Embeds */}
+                    {isGraphable2D && (
+                      <div className="f-graph-holo-box">
+                        <Graph2D 
+                          functions={line.evalResult!.graph2D!.functions}
+                          title={`${line.evalResult!.graph2D!.dependentVar}(${line.evalResult!.graph2D!.independentVar})`}
+                        />
+                      </div>
+                    )}
+
+                    {isGraphable3D && (
+                      <div className="f-graph-holo-box">
+                        <Graph3D 
+                          expr={line.evalResult!.graph3D!.expression}
+                          varX={line.evalResult!.graph3D!.varX}
+                          varY={line.evalResult!.graph3D!.varY}
+                          dependentVar={line.evalResult!.graph3D!.dependentVar}
+                        />
                       </div>
                     )}
                   </div>
                 );
               })}
+
+              {/* Add Line Prompt */}
+              <button className="f-add-line-btn" onClick={() => addLine()}>
+                <Plus size={14} />
+                <span>Add Equation Line</span>
+              </button>
             </div>
           </div>
         )}
 
-        {/* Stream A: Handwritten Vector Data Canvas */}
-        {(inputMode === 'split' || inputMode === 'canvas') && (
-          <div className="canvas-stream-pane">
-            <div className="stream-header">
-              <span className="stream-title">Handwritten Stylus Canvas</span>
-
-              <div className="header-paper-switch">
-                <button 
-                  className={`paper-btn ${paperStyle === 'grid' ? 'active' : ''}`}
-                  onClick={() => setPaperStyle('grid')}
-                  title="Grid Paper"
-                >
-                  <Grid size={13} />
-                </button>
-                <button 
-                  className={`paper-btn ${paperStyle === 'lined' ? 'active' : ''}`}
-                  onClick={() => setPaperStyle('lined')}
-                  title="Lined Paper"
-                >
-                  <Layers size={13} />
-                </button>
-                <button 
-                  className={`paper-btn ${paperStyle === 'blank' ? 'active' : ''}`}
-                  onClick={() => setPaperStyle('blank')}
-                  title="Blank Paper"
-                >
-                  Blank
-                </button>
-              </div>
-            </div>
-
-            {statusNotice && (
-              <div className="canvas-status-banner">
-                {isSolvingHandwriting && <span className="canvas-spinner"></span>}
-                <span>{statusNotice}</span>
+        {/* MODE B: Futuristic Neon Stylus Canvas */}
+        {mode === 'draw' && (
+          <div className="f-stylus-canvas-container" ref={canvasContainerRef}>
+            {statusMessage && (
+              <div className="f-canvas-status-pill">
+                {isSolving && <span className="f-status-spinner" />}
+                <span>{statusMessage}</span>
               </div>
             )}
 
-            {/* Interactive Drawing Canvas */}
-            <div 
-              className={`canvas-interactive-area paper-${paperStyle}`}
-              ref={canvasContainerRef}
-            >
-              <SignatureCanvas 
-                ref={sigPadRef}
-                penColor={penColor}
-                minWidth={penWidth * 0.7}
-                maxWidth={penWidth * 1.4}
-                velocityFilterWeight={0.7}
-                onEnd={() => {
-                  setTimeout(evaluateHandwriting, 1600);
+            <SignatureCanvas 
+              ref={sigPadRef}
+              penColor={activePenColor}
+              minWidth={2.2}
+              maxWidth={4.2}
+              velocityFilterWeight={0.7}
+              onEnd={() => {
+                setTimeout(solveHandwriting, 1500);
+              }}
+              canvasProps={{ className: 'f-neural-canvas' }}
+            />
+
+            {/* Anchored Holographic Handwritten Results */}
+            {handwrittenItems.map(item => (
+              <div 
+                key={item.id}
+                className="f-handwritten-holo-anchor"
+                style={{
+                  left: `${item.x}px`,
+                  top: `${item.y - Math.round(item.fontSize * 0.45)}px`,
+                  fontSize: `${item.fontSize}px`
                 }}
-                canvasProps={{ className: 'apple-drawing-canvas' }}
-              />
-
-              {/* Anchored Handwritten Inline Results */}
-              {handwrittenItems.map((item) => {
-                const isBoolTrue = item.result.toLowerCase() === 'true';
-                const isBoolFalse = item.result.toLowerCase() === 'false';
-
-                if (item.status === 'suggested') {
-                  return (
-                    <div 
-                      key={item.id}
-                      className="canvas-suggest-pill"
-                      style={{ left: `${item.x}px`, top: `${item.y - 12}px` }}
-                    >
-                      <button 
-                        className="suggest-click-target"
-                        onClick={() => {
-                          setHandwrittenItems(prev => prev.map(h => h.id === item.id ? { ...h, status: 'inserted' } : h));
-                        }}
-                      >
-                        <span className="dot"></span>
-                        <span>Solve: {item.result}</span>
-                      </button>
-                      <button 
-                        className="suggest-close"
-                        onClick={() => setHandwrittenItems(prev => prev.filter(h => h.id !== item.id))}
-                      >
-                        <X size={11} />
-                      </button>
-                    </div>
-                  );
-                }
-
-                return (
-                  <div 
-                    key={item.id}
-                    className={`canvas-inline-result ${item.isWrapped ? 'wrapped-subline' : ''}`}
-                    style={{
-                      left: `${item.x}px`,
-                      top: `${item.y - Math.round(item.fontSize * 0.45)}px`,
-                      fontSize: `${item.fontSize}px`
-                    }}
-                  >
-                    {item.isWrapped && <span className="indent-arrow">↳</span>}
-                    <span 
-                      className={`handwritten-font-replica ${isBoolTrue ? 'bool-true' : isBoolFalse ? 'bool-false' : 'num-val'}`}
-                      onClick={() => copyToClipboard(item.result)}
-                      title="Click to copy answer"
-                    >
-                      {isBoolTrue && <Check size={Math.round(item.fontSize * 0.65)} style={{ display: 'inline-block', marginRight: 4 }} />}
-                      {item.result}
-                    </span>
-                    <button 
-                      className="remove-hw-btn"
-                      onClick={() => setHandwrittenItems(prev => prev.filter(h => h.id !== item.id))}
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                );
-              })}
-
-              {/* Floating Apple Pencil Toolkit at Bottom */}
-              <div className="floating-pencil-kit">
-                {/* Pen */}
-                <button 
-                  className={`tool-item ${activeTool === 'pen' ? 'active' : ''}`}
-                  onClick={() => setActiveTool('pen')}
-                  title="Pen Tool"
+              >
+                <span 
+                  className="holo-handwritten-text"
+                  onClick={() => copyAnswer(item.result)}
+                  title="Click to copy answer"
                 >
-                  <PenTool size={16} />
-                  <span>Pen</span>
-                </button>
-
-                {/* Highlighter */}
+                  = {item.result}
+                </span>
                 <button 
-                  className={`tool-item ${activeTool === 'highlighter' ? 'active' : ''}`}
-                  onClick={() => setActiveTool('highlighter')}
-                  title="Highlighter"
+                  className="f-hw-del-btn"
+                  onClick={() => setHandwrittenItems(prev => prev.filter(h => h.id !== item.id))}
                 >
-                  <Highlighter size={16} />
-                  <span>Highlighter</span>
-                </button>
-
-                {/* Eraser */}
-                <button 
-                  className={`tool-item ${activeTool === 'eraser' ? 'active' : ''}`}
-                  onClick={() => setActiveTool('eraser')}
-                  title="Eraser"
-                >
-                  <Eraser size={16} />
-                  <span>Eraser</span>
-                </button>
-
-                <div className="kit-divider" />
-
-                {/* Color Palette */}
-                <div className="kit-colors">
-                  {['#ff9f0a', '#007aff', '#30d158', '#ffffff', '#ff375f'].map(c => (
-                    <button 
-                      key={c}
-                      className={`kit-color-dot ${activePenColor === c ? 'active' : ''}`}
-                      style={{ backgroundColor: c }}
-                      onClick={() => { setActivePenColor(c); if (activeTool === 'eraser') setActiveTool('pen'); }}
-                    />
-                  ))}
-                </div>
-
-                {/* Stroke Thickness Selector */}
-                <div className="kit-divider" />
-                <div className="kit-stroke-widths">
-                  {[1.5, 2.5, 4.5].map(w => (
-                    <button 
-                      key={w}
-                      className={`kit-stroke-btn ${penStrokeWidth === w ? 'active' : ''}`}
-                      onClick={() => setPenStrokeWidth(w)}
-                      title={`${w}px`}
-                    >
-                      <span style={{ width: Math.round(w * 2.2), height: Math.round(w * 2.2), borderRadius: '50%', backgroundColor: '#ffffff', display: 'inline-block' }} />
-                    </button>
-                  ))}
-                </div>
-
-                <div className="kit-divider" />
-
-                {/* Pencil Demo */}
-                <button 
-                  className="kit-demo-btn" 
-                  onClick={drawSampleHandwriting}
-                  title="Simulate Apple Pencil Handwriting (24 + 36 =)"
-                >
-                  <Sparkles size={14} />
-                  <span>Pencil Demo</span>
-                </button>
-
-                {/* Clear & Solve Actions */}
-                <button className="kit-action-btn" onClick={clearCanvas} title="Clear Canvas">
-                  <RotateCcw size={14} />
-                </button>
-
-                <button 
-                  className="kit-solve-btn" 
-                  onClick={evaluateHandwriting}
-                  disabled={isSolvingHandwriting}
-                  title="Solve math handwriting"
-                >
-                  <Calculator size={14} />
-                  <span>Solve</span>
+                  <X size={11} />
                 </button>
               </div>
+            ))}
+
+            {/* Floating Minimalist Stylus Dock */}
+            <div className="f-floating-stylus-dock">
+              {/* Color Glowing Dots */}
+              <div className="f-dock-colors">
+                {['#00f2fe', '#4facfe', '#77DD77', '#ff9f0a', '#ff007f'].map(c => (
+                  <button 
+                    key={c}
+                    className={`f-color-dot ${activePenColor === c ? 'active' : ''}`}
+                    style={{ backgroundColor: c, boxShadow: activePenColor === c ? `0 0 12px ${c}` : 'none' }}
+                    onClick={() => setActivePenColor(c)}
+                  />
+                ))}
+              </div>
+
+              <div className="f-dock-divider" />
+
+              {/* Sample Handwriting Demo */}
+              <button className="f-dock-action-btn" onClick={drawSampleHandwriting} title="Draw Pencil Demo">
+                <Sparkles size={14} color="#00f2fe" />
+                <span>Pencil Demo</span>
+              </button>
+
+              {/* Clear Canvas */}
+              <button className="f-dock-icon-btn" onClick={clearDrawCanvas} title="Clear Canvas">
+                <RotateCcw size={14} />
+              </button>
+
+              {/* Instant Solve Button */}
+              <button 
+                className="f-dock-solve-btn"
+                onClick={solveHandwriting}
+                disabled={isSolving}
+                title="Solve Handwriting"
+              >
+                <Zap size={14} />
+                <span>Solve</span>
+              </button>
             </div>
           </div>
         )}
-      </div>
+      </main>
 
-      {/* Symbol Table Inspector HUD Drawer */}
-      {showSymbolInspector && (
-        <div className="symbol-inspector-drawer">
-          <div className="inspector-header">
-            <div className="inspector-title-group">
-              <Variable size={16} color="#ff9f0a" />
-              <span>Stateful Global Symbol Table & Reactive DAG</span>
+      {/* Floating Holographic Variable HUD Drawer */}
+      {showVariableHUD && (
+        <aside className="f-variables-hud-panel">
+          <div className="hud-header">
+            <div className="hud-title-row">
+              <Variable size={16} color="#00f2fe" />
+              <span>Reactive Symbol Table</span>
             </div>
-            <button className="inspector-close" onClick={() => setShowSymbolInspector(false)}>
+            <button className="hud-close-btn" onClick={() => setShowVariableHUD(false)}>
               <X size={15} />
             </button>
           </div>
 
-          <div className="inspector-body">
+          <div className="hud-body">
             {symbolTable.length === 0 ? (
-              <div className="empty-symbol-msg">
-                No active variables defined yet. Type <code>mass = 12.5</code> or write with stylus.
+              <div className="hud-empty">
+                No active variables defined yet. Type <code>radius = 14</code> in the pad.
               </div>
             ) : (
-              <div className="symbol-grid">
+              <div className="hud-grid">
                 {symbolTable.map(sym => (
-                  <div key={sym.name} className="symbol-card">
-                    <div className="symbol-card-top">
-                      <span className="sym-name">{sym.name}</span>
-                      <span className="sym-value">{String(sym.value)}</span>
+                  <div key={sym.name} className="hud-card">
+                    <div className="hud-card-top">
+                      <span className="hud-var-name">{sym.name}</span>
+                      <span className="hud-var-val">{String(sym.value)}</span>
                     </div>
-                    <div className="symbol-card-bottom">
-                      <span className="sym-expr">{sym.expression}</span>
-                      {sym.dependents.length > 0 && (
-                        <span className="sym-dag">
-                          <Activity size={11} style={{ marginRight: 3, verticalAlign: 'middle' }} />
-                          affects: {sym.dependents.join(', ')}
-                        </span>
-                      )}
-                    </div>
+                    {sym.dependents.length > 0 && (
+                      <div className="hud-card-dep">
+                        <Activity size={10} style={{ marginRight: 3, verticalAlign: 'middle' }} />
+                        affects: {sym.dependents.join(', ')}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             )}
           </div>
-        </div>
+        </aside>
       )}
     </div>
   );
