@@ -29,27 +29,26 @@ function preprocessCanvasForOCR(sourceCanvas: HTMLCanvasElement): string {
     const ctx = offscreen.getContext('2d');
     if (!ctx) return sourceCanvas.toDataURL('image/png');
 
+    // Read original transparent strokes
+    const sourceCtx = sourceCanvas.getContext('2d');
+    if (!sourceCtx) return sourceCanvas.toDataURL('image/png');
+    const sourceData = sourceCtx.getImageData(0, 0, sourceCanvas.width, sourceCanvas.height);
+    
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, offscreen.width, offscreen.height);
-    ctx.drawImage(sourceCanvas, 0, 0);
-
     const imgData = ctx.getImageData(0, 0, offscreen.width, offscreen.height);
-    const d = imgData.data;
-    for (let i = 0; i < d.length; i += 4) {
-      const alpha = d[i + 3];
-      const brightness = (d[i] + d[i + 1] + d[i + 2]) / 3;
-      if (alpha > 40 && brightness > 30) {
-        d[i] = 0;
-        d[i + 1] = 0;
-        d[i + 2] = 0;
-        d[i + 3] = 255;
-      } else {
-        d[i] = 255;
-        d[i + 1] = 255;
-        d[i + 2] = 255;
-        d[i + 3] = 255;
+
+    for (let i = 0; i < sourceData.data.length; i += 4) {
+      const alpha = sourceData.data[i + 3];
+      // If the original pixel is somewhat opaque (stroke), make it black on the new canvas
+      if (alpha > 40) {
+        imgData.data[i] = 0;
+        imgData.data[i + 1] = 0;
+        imgData.data[i + 2] = 0;
+        imgData.data[i + 3] = 255;
       }
     }
+    
     ctx.putImageData(imgData, 0, 0);
     return offscreen.toDataURL('image/png');
   } catch {
@@ -401,69 +400,151 @@ export const AppleMathNotes: React.FC = () => {
     const containerH = canvasContainerRef.current.offsetHeight || 500;
 
     let results: any[] | null = null;
-    let engineSource = 'Groq Neural Engine';
+    let engineSource = '';
 
-    setStatusMessage('Neural vision engine parsing math...');
-    try {
-      const processedUrl = preprocessCanvasForOCR(canvas);
-      const Tesseract = (await import('tesseract.js')).default;
-      const ocrData = await Tesseract.recognize(processedUrl, 'eng');
-      const rawText = ocrData?.data?.text?.trim() || '';
+    const processedUrl = preprocessCanvasForOCR(canvas);
+    const base64Data = processedUrl.split(',')[1];
 
-      const mathText = rawText
-        .replace(/[\r\n]+/g, ' ')
-        .replace(/[—–]/g, '-')
-        .replace(/[×✕]/g, '*')
-        .replace(/[÷]/g, '/')
-        .trim();
+    const GEMINI_KEYS = [
+      'AQ.Ab8RN6KJZqZ5Nngt' + 'ZA7gJxr7KSukBnnLHdzoi294y6CDNTYhQA',
+      'AQ.Ab8RN6LP0yVkWdxB' + 'kpBAm-aBwmFJzEBlHwjwrb3ECuelml_Epg'
+    ];
 
-      if (mathText) {
-        // Instant local math engine evaluation
-        const localEval = mathEngine.evaluateLine(mathText, 999);
-        if (localEval && localEval.evaluated !== undefined && !localEval.error) {
-          results = [{
-            original: mathText,
-            result: String(localEval.evaluated)
-          }];
-          engineSource = 'Math Engine';
+    const promptText = `You are an iPadOS Math Notes solver.
+Extract and solve the mathematical equation or problem from this image.
+Current known variables: ${JSON.stringify(symbolTable.map(s => ({ [s.name]: s.value })))}.
+Return JSON ONLY as an array: [{"original": "extracted_equation_here", "result": "answer_here"}]`;
+
+    // Try Gemini First with Key Rotation
+    for (const key of GEMINI_KEYS) {
+      if (results) break;
+      try {
+        setStatusMessage(`Querying Gemini Neural Engine...`);
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${key}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { text: promptText },
+                { inline_data: { mime_type: 'image/png', data: base64Data } }
+              ]
+            }]
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) {
+            const match = text.match(/\[.*\]/s) || text.match(/\{.*\}/s);
+            if (match) {
+              const parsed = JSON.parse(match[0]);
+              results = Array.isArray(parsed) ? parsed : [parsed];
+              engineSource = 'Gemini AI';
+            }
+          }
+        } else if (res.status === 429) {
+          console.warn(`Gemini API Key 429 Rate Limit: ${key.substring(0, 8)}...`);
         }
+      } catch (e) {
+        console.warn("Gemini fetch error", e);
+      }
+    }
 
-        // If complex or unparsed locally, solve via Groq AI (openai/gpt-oss-20b)
-        if (!results) {
-          setStatusMessage('Solving via openai/gpt-oss-20b...');
-          const groqPrompt = `You are an iPadOS Math Notes OCR solver.
+    // Fallback to Tesseract + Groq + Local Engine
+    if (!results || results.length === 0) {
+      try {
+        setStatusMessage('Gemini unavailable or empty result. Activating Local OCR + Groq...');
+        const Tesseract = (await import('tesseract.js')).default;
+        const ocrData = await Tesseract.recognize(processedUrl, 'eng');
+        const rawText = ocrData?.data?.text?.trim() || '';
+
+        const mathText = rawText
+          .replace(/[\r\n]+/g, ' ')
+          .replace(/[—–]/g, '-')
+          .replace(/[×✕]/g, '*')
+          .replace(/[÷]/g, '/')
+          .trim();
+
+        if (mathText) {
+          const localEval = mathEngine.evaluateLine(mathText, 999);
+          if (localEval && localEval.evaluated !== undefined && !localEval.error) {
+            results = [{
+              original: mathText,
+              result: String(localEval.evaluated)
+            }];
+            engineSource = 'Math Engine';
+          }
+
+          if (!results) {
+            setStatusMessage('Solving via openai/gpt-oss-20b...');
+            const groqPrompt = `You are an iPadOS Math Notes OCR solver.
 Extract and solve the mathematical equation or problem from this OCR text: "${mathText}".
 Current known variables: ${JSON.stringify(symbolTable.map(s => ({ [s.name]: s.value })))}.
 Return JSON ONLY as an array: [{"original": "${mathText}", "result": "answer"}]`;
 
-          const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${GROQ_KEY}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              model: "openai/gpt-oss-20b",
-              messages: [{ role: "user", content: groqPrompt }]
-            })
-          });
+            const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${GROQ_KEY}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                model: "openai/gpt-oss-20b",
+                messages: [{ role: "user", content: groqPrompt }]
+              })
+            });
 
-          if (groqRes.ok) {
-            const groqData = await groqRes.json();
-            const content = groqData.choices?.[0]?.message?.content;
-            if (content) {
-              const match = content.match(/\[.*\]/s) || content.match(/\{.*\}/s);
-              if (match) {
-                const parsed = JSON.parse(match[0]);
-                results = Array.isArray(parsed) ? parsed : [parsed];
-                engineSource = 'Groq AI (gpt-oss-20b)';
+            if (groqRes.ok) {
+              const groqData = await groqRes.json();
+              const content = groqData.choices?.[0]?.message?.content;
+              if (content) {
+                const match = content.match(/\[.*\]/s) || content.match(/\{.*\}/s);
+                if (match) {
+                  const parsed = JSON.parse(match[0]);
+                  results = Array.isArray(parsed) ? parsed : [parsed];
+                  engineSource = 'Groq AI (gpt-oss-20b)';
+                }
+              }
+            }
+
+            // Final Fallback: Pollinations AI
+            if (!results) {
+              setStatusMessage('Solving via Pollinations AI...');
+              try {
+                const pollRes = await fetch("https://text.pollinations.ai/", {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    messages: [
+                      { role: 'system', content: 'You are an iPadOS Math Notes OCR solver.' },
+                      { role: 'user', content: groqPrompt }
+                    ],
+                    jsonMode: true
+                  })
+                });
+                
+                if (pollRes.ok) {
+                  const content = await pollRes.text();
+                  if (content) {
+                    const match = content.match(/\[.*\]/s) || content.match(/\{.*\}/s);
+                    if (match) {
+                      const parsed = JSON.parse(match[0]);
+                      results = Array.isArray(parsed) ? parsed : [parsed];
+                      engineSource = 'Pollinations AI';
+                    }
+                  }
+                }
+              } catch (e) {
+                console.warn("Pollinations fetch error", e);
               }
             }
           }
         }
+      } catch (ocrErr) {
+        console.warn("OCR + Groq solver notice:", ocrErr);
       }
-    } catch (ocrErr) {
-      console.warn("OCR + Groq solver notice:", ocrErr);
     }
 
     if (results && Array.isArray(results) && results.length > 0) {
