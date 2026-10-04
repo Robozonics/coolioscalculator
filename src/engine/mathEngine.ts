@@ -211,6 +211,26 @@ export class MathEngine {
       exprToEval = assignmentMatch[2].trim();
     }
 
+    // Check for unit conversion syntax: e.g. "50 m in ft", "100 km to mi", "100 degC to degF"
+    if (!exprToEval.includes('{') && /\b(to|in)\b/.test(exprToEval)) {
+      const unitExpr = exprToEval.replace(/\bin\b/g, 'to');
+      try {
+        const unitRes = math.evaluate(unitExpr);
+        if (unitRes && typeof unitRes === 'object' && ('value' in unitRes || 'units' in unitRes)) {
+          const formatted = (unitRes as any).format ? (unitRes as any).format({ precision: 5 }) : unitRes.toString();
+          return {
+            raw: line,
+            evaluated: formatted,
+            isAssignment,
+            assignedVar,
+            dependencies: []
+          };
+        }
+      } catch {
+        // Fall back to standard evaluation
+      }
+    }
+
     // Check for equality or inequality logic: e.g. "7=9", "5 > 3", "x in {1,2,3}"
     if (!isAssignment && (clean.includes('==') || clean.includes('!=') || clean.includes('>') || clean.includes('<') || clean.includes(' in '))) {
       return this.evaluateLogic(clean);
@@ -272,13 +292,34 @@ export class MathEngine {
       }
     }
 
+    // Check for unit conversion syntax: e.g. "50 m in ft", "100 km to mi", "100 degC to degF"
+    if (!exprToEval.includes('{') && /\b(to|in)\b/.test(exprToEval)) {
+      const unitExpr = exprToEval.replace(/\bin\b/g, 'to');
+      try {
+        const unitRes = math.evaluate(unitExpr);
+        if (unitRes && typeof unitRes === 'object' && 'value' in unitRes) {
+          return {
+            raw: line,
+            evaluated: (unitRes as any).format ? (unitRes as any).format({ precision: 5 }) : unitRes.toString(),
+            isAssignment,
+            assignedVar,
+            dependencies: []
+          };
+        }
+      } catch {
+        // Fall back to standard evaluation
+      }
+    }
+
     // Evaluate expression with scope
     try {
       const normalized = this.normalizeExpression(exprToEval);
       const res = math.evaluate(normalized, scope);
 
       let formatted = '';
-      if (typeof res === 'number') {
+      if (res && typeof res === 'object' && 'value' in res && 'unit' in res) {
+        formatted = (res as any).format ? (res as any).format({ precision: 5 }) : res.toString();
+      } else if (typeof res === 'number') {
         if (isNaN(res)) formatted = 'undefined';
         else if (!isFinite(res)) formatted = 'Infinity';
         else if (Math.abs(res) < 1e-12 && Math.abs(res) > 0) formatted = '0';
