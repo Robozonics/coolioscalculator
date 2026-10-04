@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import * as math from 'mathjs';
 import { Calculator as CalcIcon } from 'lucide-react';
 
@@ -12,6 +12,18 @@ const BasicCalculator = ({ isScientific, onToggleScientific }: Props) => {
   const [result, setResult] = useState('0');
   const [isRad, setIsRad] = useState(true);
   const [justCalculated, setJustCalculated] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const key = e.key;
+      if (/^[0-9.]$/.test(key)) handlePress(key);
+      else if (['+', '-', '*', '/'].includes(key)) handlePress(key);
+      else if (key === 'Enter' || key === '=') { e.preventDefault(); calculate(); }
+      else if (key === 'Escape' || key === 'Backspace') clearAll();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [justCalculated, expression, result]);
 
   const handlePress = (val: string) => {
     if (justCalculated) {
