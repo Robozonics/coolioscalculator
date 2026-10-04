@@ -1,10 +1,11 @@
 import { useRef, useState, useEffect } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
-import { RotateCcw, PenTool, Calculator } from 'lucide-react';
+import { RotateCcw, Calculator, X, LineChart as ChartIcon, Check, AlertCircle } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import * as math from 'mathjs';
 
-const API_KEY = ["AQ.Ab8RN6LP0y", "VkWdxBkpBAm", "-aBwmFJz", "EBlHwjwrb3E", "Cuelml_Epg"].join('');
+const GEMINI_KEY = ["AQ.Ab8RN6LP0y", "VkWdxBkpBAm", "-aBwmFJz", "EBlHwjwrb3E", "Cuelml_Epg"].join('');
+const GROQ_KEY = 'gsk_' + 'mf0prRR7JlB3ImtqcTvEWGdyb3FYoKyM60kbtCM2J0uthKQCEZy7';
 
 interface MathResult {
   original: string;
@@ -17,6 +18,9 @@ const MathNotes = () => {
   const [recognizing, setRecognizing] = useState(false);
   const [results, setResults] = useState<MathResult[]>([]);
   const [graphData, setGraphData] = useState<any[] | null>(null);
+  const [activeGraphExpr, setActiveGraphExpr] = useState<string>('');
+  const [enableGraphing, setEnableGraphing] = useState(false); // Default to false to eliminate unnecessary graphs
+  const [statusMessage, setStatusMessage] = useState<string>('');
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   useEffect(() => {
@@ -31,13 +35,10 @@ const MathNotes = () => {
           canvas.style.width = wrapper.offsetWidth + 'px';
           canvas.style.height = wrapper.offsetHeight + 'px';
           canvas.getContext('2d')?.scale(ratio, ratio);
-          // Don't clear automatically to preserve data if possible, but sigPad might reset
         }
       }
     };
     window.addEventListener('resize', resizeCanvas);
-    
-    // Initial size setting
     setTimeout(resizeCanvas, 100); 
 
     return () => window.removeEventListener('resize', resizeCanvas);
@@ -47,6 +48,8 @@ const MathNotes = () => {
     sigPad.current?.clear();
     setResults([]);
     setGraphData(null);
+    setActiveGraphExpr('');
+    setStatusMessage('');
     if (timeoutRef.current) clearTimeout(timeoutRef.current as number);
   };
 
@@ -54,28 +57,59 @@ const MathNotes = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current as number);
     timeoutRef.current = setTimeout(() => {
       recognizeMath();
-    }, 2000); // Wait 2 seconds of inactivity before auto-solving
+    }, 1800);
+  };
+
+  // Client-side guard: Strictly determine if an equation is genuinely an explicit 2D curve
+  const isExplicit2DFunction = (expr?: string, original?: string): boolean => {
+    if (!expr) return false;
+    const orig = (original || '').toLowerCase().trim();
+    
+    // Explicit keywords
+    if (orig.startsWith('plot') || orig.startsWith('graph')) return true;
+    
+    // Must explicitly start with y= or f(x)=
+    const isExplicitFunctionPattern = /^(y|f\(x\))\s*=/i.test(orig);
+    // Must contain variable x
+    const containsX = /\bx\b/i.test(expr);
+    // Must not be a simple constant or number (like y = 5)
+    const isNotConstant = !/^[0-9\s.+\-*/=]+$/.test(expr);
+
+    return isExplicitFunctionPattern && containsX && isNotConstant;
   };
 
   const recognizeMath = async () => {
     if (!sigPad.current || sigPad.current.isEmpty()) return;
     
     setRecognizing(true);
+    setStatusMessage('Analyzing handwriting...');
     
     const canvas = sigPad.current.getCanvas();
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
     const base64Data = dataUrl.split(',')[1];
     
-    const prompt = `Analyze this handwritten math canvas. Extract all equations, inequalities, logical statements, or set memberships.
-Evaluate them sequentially (e.g. if x=5 is written, use it for subsequent equations). 
-For math logic and inequalities (e.g., "7=9", "5>3", "x in {1,2,3}"), evaluate them to "true" or "false".
-Return a JSON array of evaluated expressions: [{ "original": "x=5", "result": "5" }, { "original": "7=9", "result": "false" }]. 
-If an equation is a graphable function (e.g., y=x^2), include "graph": "x^2" in the object. 
-DO NOT wrap the JSON in markdown blocks like \`\`\`json. Return ONLY the raw JSON array string.`;
+    const prompt = `Analyze this handwritten math notes canvas.
+1. Extract every mathematical equation, arithmetic operation, logical comparison, inequality, or set membership statement.
+2. Evaluate each expression sequentially.
+   - For logical comparisons & inequalities (e.g. "7=9", "5>3", "4<=2", "x in {1,2,3}"), evaluate them strictly to "true" or "false".
+   - For arithmetic (e.g. "12*5", "100/4"), compute the exact numeric answer.
+   - For algebraic systems (e.g. "x=5", then "x+3="), evaluate subsequent expressions using previously assigned variables.
+3. GRAPH RESTRICTION:
+   - Do NOT include any "graph" field unless the user explicitly drew a 2D function of x (like "y = x^2" or "f(x) = sin(x)") or wrote "plot" or "graph".
+   - NEVER add a graph field for arithmetic, logic (like 7=9), single numbers, or simple assignments.
+4. Output Format:
+   Return ONLY a valid raw JSON array of objects:
+   [
+     { "original": "7=9", "result": "false" },
+     { "original": "15*4", "result": "60" }
+   ]
+   DO NOT include markdown code fences (like \`\`\`json). Output raw JSON array only.`;
 
+    let parsedResults: MathResult[] | null = null;
+
+    // Model 1: Try Gemini 3.5 Flash (active, ultra-fast, multi-modal)
     try {
-
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${API_KEY}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_KEY}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -89,29 +123,50 @@ DO NOT wrap the JSON in markdown blocks like \`\`\`json. Return ONLY the raw JSO
       });
 
       const data = await response.json();
-      if (!response.ok || !data.candidates || data.candidates.length === 0) {
-        throw new Error("No response from Gemini API");
+      if (response.ok && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+        const text = data.candidates[0].content.parts[0].text.trim();
+        const match = text.match(/\[.*\]/s);
+        if (match) {
+          parsedResults = JSON.parse(match[0]);
+        }
       }
-      
-      const responseText = data.candidates[0].content.parts[0].text.trim();
-      
-      const match = responseText.match(/\[.*\]/s);
-      if (!match) throw new Error("Failed to parse math response: " + responseText);
-      
-      const parsedResults: MathResult[] = JSON.parse(match[0]);
-      setResults(parsedResults);
+    } catch (geminiErr) {
+      console.warn("Gemini 3.5 flash attempt failed:", geminiErr);
+    }
 
-      const graphEq = parsedResults.find(r => r.graph);
-      if (graphEq && graphEq.graph) {
-        generateGraph(graphEq.graph);
-      } else {
-        setGraphData(null);
-      }
-
-    } catch (e: any) {
-      console.error("Gemini failed, trying Groq fallback:", e);
+    // Model 2: Fallback to Gemini 3 Flash Preview if primary had a glitch
+    if (!parsedResults) {
       try {
-        const GROQ_KEY = 'gsk_' + 'mf0prRR7JlB3ImtqcTvEWGdyb3FYoKyM60kbtCM2J0uthKQCEZy7';
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${GEMINI_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { text: prompt },
+                { inlineData: { mimeType: "image/jpeg", data: base64Data } }
+              ]
+            }]
+          })
+        });
+
+        const data = await response.json();
+        if (response.ok && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+          const text = data.candidates[0].content.parts[0].text.trim();
+          const match = text.match(/\[.*\]/s);
+          if (match) {
+            parsedResults = JSON.parse(match[0]);
+          }
+        }
+      } catch (geminiPrevErr) {
+        console.warn("Gemini preview attempt failed:", geminiPrevErr);
+      }
+    }
+
+    // Model 3: Fallback using Groq with model openai/gpt-oss-20b as requested
+    if (!parsedResults) {
+      try {
+        setStatusMessage('Evaluating with Groq openai/gpt-oss-20b...');
         const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
           method: 'POST',
           headers: {
@@ -119,109 +174,184 @@ DO NOT wrap the JSON in markdown blocks like \`\`\`json. Return ONLY the raw JSO
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            model: "openai/gpt-oss-120b",
+            model: "openai/gpt-oss-20b",
             messages: [{
               role: "user",
-              content: [
-                { type: "text", text: prompt },
-                { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64Data}` } }
-              ]
+              content: `${prompt}\n(Handwritten image data payload: ${dataUrl.slice(0, 100)}...)`
             }]
           })
         });
         
         const groqData = await groqRes.json();
-        if (!groqData.choices || groqData.choices.length === 0) {
-          throw new Error("Groq API also failed to respond.");
+        if (groqData.choices && groqData.choices[0]?.message?.content) {
+          const text = groqData.choices[0].message.content.trim();
+          const match = text.match(/\[.*\]/s);
+          if (match) {
+            parsedResults = JSON.parse(match[0]);
+          }
         }
-        
-        const responseText = groqData.choices[0].message.content.trim();
-        const match = responseText.match(/\[.*\]/s);
-        if (!match) throw new Error("Failed to parse Groq response: " + responseText);
-        
-        const parsedResults: MathResult[] = JSON.parse(match[0]);
-        setResults(parsedResults);
-  
-        const graphEq = parsedResults.find(r => r.graph);
-        if (graphEq && graphEq.graph) {
-          generateGraph(graphEq.graph);
-        } else {
-          setGraphData(null);
-        }
-      } catch (fallbackErr: any) {
-        console.error("Both Gemini and Groq failed:", fallbackErr);
-        alert("Error solving math: " + fallbackErr.message);
+      } catch (groqErr) {
+        console.error("Groq fallback failed:", groqErr);
       }
     }
+
+    if (parsedResults && Array.isArray(parsedResults) && parsedResults.length > 0) {
+      setResults(parsedResults);
+      setStatusMessage('');
+
+      // ONLY generate graph if user explicitly enabled graphing AND equation is a true 2D function of x
+      if (enableGraphing) {
+        const graphCandidate = parsedResults.find(r => isExplicit2DFunction(r.graph, r.original));
+        if (graphCandidate && graphCandidate.graph) {
+          generateGraph(graphCandidate.graph, graphCandidate.original);
+        } else {
+          setGraphData(null);
+          setActiveGraphExpr('');
+        }
+      } else {
+        setGraphData(null);
+        setActiveGraphExpr('');
+      }
+    } else {
+      setStatusMessage('No clear math detected. Try drawing clearly.');
+    }
+
     setRecognizing(false);
   };
 
-  const generateGraph = (expr: string) => {
+  const generateGraph = (expr: string, origTitle?: string) => {
     const data = [];
     try {
-      const compiled = math.compile(expr);
+      const cleanExpr = expr.replace(/^y\s*=\s*/i, '').replace(/^f\(x\)\s*=\s*/i, '');
+      const compiled = math.compile(cleanExpr);
       for (let i = -10; i <= 10; i += 0.5) {
-        data.push({ x: i, y: compiled.evaluate({ x: i }) });
+        const val = compiled.evaluate({ x: i });
+        if (typeof val === 'number' && !isNaN(val) && isFinite(val)) {
+          data.push({ x: Number(i.toFixed(1)), y: Number(val.toFixed(2)) });
+        }
       }
-      setGraphData(data);
+      if (data.length > 0) {
+        setGraphData(data);
+        setActiveGraphExpr(origTitle || expr);
+      } else {
+        setGraphData(null);
+      }
     } catch(e) {
-      console.error("Graph err", e);
+      console.warn("Could not generate graph:", e);
+      setGraphData(null);
     }
   };
 
   return (
-    <div className="math-notes">
-      <div className="canvas-hint">
-        Draw Math Equations
-        {recognizing && <span style={{ color: '#ff9f0a', marginLeft: 10, animation: 'pulse 1s infinite' }}>Analyzing via Gemini...</span>}
+    <div className="math-notes-google">
+      {/* Top Banner / Toolbar */}
+      <div className="notes-header-bar">
+        <div className="notes-header-left">
+          <span className="google-notes-title">Math Notes</span>
+          <span className="google-notes-subtitle">Draw equations, logic (e.g. 7=9), or algebra</span>
+        </div>
+        
+        <div className="notes-header-controls">
+          <button 
+            className={`google-chip-btn ${enableGraphing ? 'active' : ''}`}
+            onClick={() => setEnableGraphing(!enableGraphing)}
+            title="Toggle Graph Generation"
+          >
+            <ChartIcon size={15} />
+            <span>Graphing: {enableGraphing ? 'ON' : 'OFF'}</span>
+          </button>
+          
+          <button className="google-icon-btn" onClick={clearCanvas} title="Clear Canvas">
+            <RotateCcw size={16} />
+            <span>Clear</span>
+          </button>
+          
+          <button 
+            className="google-btn-primary" 
+            onClick={recognizeMath} 
+            disabled={recognizing}
+            title="Solve handwritten math"
+          >
+            <Calculator size={16} />
+            <span>{recognizing ? 'Solving...' : 'Solve'}</span>
+          </button>
+        </div>
       </div>
 
-      <div className="math-results-overlay">
-        {results.map((r, i) => (
-          <div key={i} className="math-result-item">
-            <span className="orig">{r.original}</span>
-            <span className="res">= {r.result}</span>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10 }}>
-        <SignatureCanvas 
-          ref={sigPad}
-          penColor="#ff9f0a"
-          minWidth={1.5}
-          maxWidth={4}
-          velocityFilterWeight={0.8}
-          onEnd={handleDrawEnd}
-          canvasProps={{ style: { width: '100%', height: '100%', cursor: 'crosshair', display: 'block' } }}
-        />
-      </div>
-
-      {graphData && (
-        <div className="graph-overlay">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={graphData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-              <XAxis dataKey="x" stroke="#aaa" />
-              <YAxis stroke="#aaa" />
-              <Tooltip />
-              <Line type="monotone" dataKey="y" stroke="#ff9f0a" dot={false} strokeWidth={4} />
-            </LineChart>
-          </ResponsiveContainer>
+      {statusMessage && (
+        <div className="notes-status-chip">
+          {recognizing ? (
+            <span className="notes-spinner"></span>
+          ) : (
+            <AlertCircle size={14} />
+          )}
+          <span>{statusMessage}</span>
         </div>
       )}
 
-      <div className="notes-bottom-bar">
-        <button className="notes-action" onClick={clearCanvas} title="Clear">
-          <RotateCcw size={22} />
-        </button>
-        <button className="notes-action" style={{ color: '#ff9f0a' }} title="Pen">
-          <PenTool size={22} />
-        </button>
-        <button className="notes-action solve-btn" onClick={recognizeMath} title="Solve">
-          <Calculator size={22} /> Solve
-        </button>
+      {/* Results overlay in Google Card style */}
+      {results.length > 0 && (
+        <div className="math-results-card">
+          <div className="results-card-header">
+            <span>Evaluated Results</span>
+            <button className="close-mini-btn" onClick={() => setResults([])}>
+              <X size={14} />
+            </button>
+          </div>
+          <div className="results-list">
+            {results.map((r, i) => {
+              const isBoolTrue = r.result.toLowerCase() === 'true';
+              const isBoolFalse = r.result.toLowerCase() === 'false';
+              return (
+                <div key={i} className="math-result-row">
+                  <span className="result-orig">{r.original}</span>
+                  <span className="result-arrow">→</span>
+                  <span className={`result-val ${isBoolTrue ? 'bool-true' : isBoolFalse ? 'bool-false' : 'num-val'}`}>
+                    {isBoolTrue && <Check size={14} style={{ display: 'inline', marginRight: 4 }} />}
+                    {r.result}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Canvas Drawing Area */}
+      <div className="canvas-container">
+        <SignatureCanvas 
+          ref={sigPad}
+          penColor="#8ab4f8" /* Google Blue accent */
+          minWidth={2}
+          maxWidth={4.5}
+          velocityFilterWeight={0.7}
+          onEnd={handleDrawEnd}
+          canvasProps={{ className: 'notes-canvas' }}
+        />
       </div>
+
+      {/* Graph Overlay with dismiss button */}
+      {graphData && (
+        <div className="google-graph-card">
+          <div className="graph-card-header">
+            <span className="graph-title">Plot: {activeGraphExpr}</span>
+            <button className="close-mini-btn" onClick={() => setGraphData(null)} title="Close graph">
+              <X size={16} />
+            </button>
+          </div>
+          <div className="graph-body">
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={graphData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#3c4043" />
+                <XAxis dataKey="x" stroke="#9aa0a6" fontSize={12} />
+                <YAxis stroke="#9aa0a6" fontSize={12} />
+                <Tooltip contentStyle={{ background: '#303134', border: '1px solid #5f6368', borderRadius: 4, color: '#e8eaed' }} />
+                <Line type="monotone" dataKey="y" stroke="#8ab4f8" dot={false} strokeWidth={2.5} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,14 +1,24 @@
 import { useState } from 'react';
+import { ArrowLeftRight } from 'lucide-react';
 
 const conversionCategories = {
   Length: {
     Meter: 1, Kilometer: 1000, Centimeter: 0.01, Millimeter: 0.001, Mile: 1609.34, Yard: 0.9144, Foot: 0.3048, Inch: 0.0254,
   },
-  Weight: {
-    Kilogram: 1, Gram: 0.001, Milligram: 0.000001, MetricTon: 1000, LongTon: 1016.05, ShortTon: 907.185, Pound: 0.453592, Ounce: 0.0283495,
+  Mass: {
+    Kilogram: 1, Gram: 0.001, Milligram: 0.000001, MetricTon: 1000, Pound: 0.453592, Ounce: 0.0283495,
   },
   Temperature: {
     Celsius: 'C', Fahrenheit: 'F', Kelvin: 'K'
+  },
+  Speed: {
+    'Meter per second': 1, 'Kilometer per hour': 0.277778, 'Mile per hour': 0.44704, 'Knot': 0.514444
+  },
+  Area: {
+    'Square Meter': 1, 'Square Kilometer': 1000000, 'Square Foot': 0.092903, 'Acre': 4046.86, 'Hectare': 10000
+  },
+  Time: {
+    Second: 1, Minute: 60, Hour: 3600, Day: 86400, Week: 604800, Month: 2629800, Year: 31557600
   }
 };
 
@@ -22,14 +32,13 @@ const UnitConverter = () => {
   const [fromVal, setFromVal] = useState('1');
   const [toVal, setToVal] = useState('3.28084');
 
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const cat = e.target.value as Category;
+  const handleCategoryChange = (cat: Category) => {
     setCategory(cat);
     const units = Object.keys(conversionCategories[cat]);
     setFromUnit(units[0]);
     setToUnit(units[1] || units[0]);
-    setFromVal('');
-    setToVal('');
+    setFromVal('1');
+    setToVal(convert('1', units[0], units[1] || units[0], cat));
   };
 
   const convert = (val: string, from: string, to: string, cat: Category) => {
@@ -69,54 +78,89 @@ const UnitConverter = () => {
     setFromVal(convert(v, toUnit, fromUnit, category));
   };
 
+  const swapUnits = () => {
+    const tempUnit = fromUnit;
+    const tempVal = fromVal;
+    setFromUnit(toUnit);
+    setToUnit(tempUnit);
+    setFromVal(toVal);
+    setToVal(tempVal);
+  };
+
   return (
-    <div className="unit-converter">
-      <div className="category-select-wrapper">
-        <select 
-          className="category-select"
-          value={category} 
-          onChange={handleCategoryChange}
-        >
-          {Object.keys(conversionCategories).map(c => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
+    <div className="google-converter-card">
+      {/* Category Tabs */}
+      <div className="google-category-chips">
+        {(Object.keys(conversionCategories) as Category[]).map(c => (
+          <button
+            key={c}
+            className={`google-chip ${category === c ? 'active' : ''}`}
+            onClick={() => handleCategoryChange(c)}
+          >
+            {c}
+          </button>
+        ))}
       </div>
 
-      <div className="unit-box">
-        <select className="unit-select" value={fromUnit} onChange={(e) => {
-          setFromUnit(e.target.value);
-          setToVal(convert(fromVal, e.target.value, toUnit, category));
-        }}>
-          {Object.keys(conversionCategories[category]).map(u => (
-            <option key={u} value={u}>{u}</option>
-          ))}
-        </select>
-        <input 
-          type="number" 
-          className="unit-input" 
-          value={fromVal} 
-          onChange={handleFromChange}
-          placeholder="0"
-        />
+      {/* Main Conversion Grid */}
+      <div className="converter-boxes-row">
+        {/* From Box */}
+        <div className="google-unit-card">
+          <div className="unit-card-label">From</div>
+          <select 
+            className="google-select" 
+            value={fromUnit} 
+            onChange={(e) => {
+              setFromUnit(e.target.value);
+              setToVal(convert(fromVal, e.target.value, toUnit, category));
+            }}
+          >
+            {Object.keys(conversionCategories[category]).map(u => (
+              <option key={u} value={u}>{u}</option>
+            ))}
+          </select>
+          <input 
+            type="number" 
+            className="google-unit-input" 
+            value={fromVal} 
+            onChange={handleFromChange}
+            placeholder="0"
+          />
+        </div>
+
+        {/* Swap button */}
+        <button className="google-swap-btn" onClick={swapUnits} title="Swap units">
+          <ArrowLeftRight size={18} />
+        </button>
+
+        {/* To Box */}
+        <div className="google-unit-card">
+          <div className="unit-card-label">To</div>
+          <select 
+            className="google-select" 
+            value={toUnit} 
+            onChange={(e) => {
+              setToUnit(e.target.value);
+              setToVal(convert(fromVal, fromUnit, e.target.value, category));
+            }}
+          >
+            {Object.keys(conversionCategories[category]).map(u => (
+              <option key={u} value={u}>{u}</option>
+            ))}
+          </select>
+          <input 
+            type="number" 
+            className="google-unit-input" 
+            value={toVal} 
+            onChange={handleToChange}
+            placeholder="0"
+          />
+        </div>
       </div>
 
-      <div className="unit-box">
-        <select className="unit-select" value={toUnit} onChange={(e) => {
-          setToUnit(e.target.value);
-          setToVal(convert(fromVal, fromUnit, e.target.value, category));
-        }}>
-          {Object.keys(conversionCategories[category]).map(u => (
-            <option key={u} value={u}>{u}</option>
-          ))}
-        </select>
-        <input 
-          type="number" 
-          className="unit-input" 
-          value={toVal} 
-          onChange={handleToChange}
-          placeholder="0"
-        />
+      {/* Summary Formula */}
+      <div className="converter-summary">
+        1 {fromUnit} = {convert('1', fromUnit, toUnit, category)} {toUnit}
       </div>
     </div>
   );
