@@ -30,13 +30,29 @@ body, html {
   background: #000;
 }
 
+/* The panel scales perfectly but has a max width so it doesn't look stretched on laptops */
 .glass-panel {
   width: 100%;
   height: 100%;
-  max-width: 100%;
   display: flex;
   flex-direction: column;
   background: #000;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .glass-panel {
+    max-width: 450px;
+    height: 95vh;
+    border-radius: 12px;
+    border: 1px solid #333;
+  }
+  .glass-panel.scientific-open {
+    max-width: 850px;
+  }
+  .glass-panel.notes-open {
+    max-width: 1000px;
+  }
 }
 
 /* Top Toolbar */
@@ -44,8 +60,7 @@ body, html {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 15px;
-  position: relative;
+  padding: 10px;
 }
 
 .mode-switcher {
@@ -67,8 +82,7 @@ body, html {
 }
 
 .mode-tab.active {
-  background: #444;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  background: #555;
 }
 
 /* Calculator Grid */
@@ -76,7 +90,7 @@ body, html {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 0 20px 20px 20px;
+  padding: 0 15px 20px 15px;
   overflow: hidden;
 }
 
@@ -86,11 +100,11 @@ body, html {
   flex-direction: column;
   justify-content: flex-end;
   align-items: flex-end;
-  padding-bottom: 20px;
+  padding-bottom: 10px;
 }
 
 .expr-display {
-  font-size: clamp(20px, 4vw, 40px);
+  font-size: 30px;
   color: var(--text-muted);
   min-height: 40px;
   word-break: break-all;
@@ -98,80 +112,83 @@ body, html {
 }
 
 .res-display {
-  font-size: clamp(50px, 10vw, 120px);
+  font-size: 85px;
   font-weight: 300;
   color: var(--text);
   line-height: 1;
   word-break: break-all;
   text-align: right;
-  letter-spacing: -1px;
+  letter-spacing: -2px;
 }
+.res-display.long { font-size: 60px; }
+.res-display.very-long { font-size: 40px; }
 
 .keypad-container {
   display: flex;
-  gap: 12px;
+  gap: 15px;
   justify-content: center;
-  height: 60vh;
-  max-height: 800px;
 }
 
 .keypad-basic {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(5, 1fr);
-  gap: 12px;
+  gap: 15px;
   width: 100%;
-  height: 100%;
 }
 
 .keypad-sci {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: repeat(5, 1fr);
-  gap: 12px;
+  gap: 15px;
   width: 100%;
-  height: 100%;
-  padding-right: 12px;
+  padding-right: 15px;
 }
 
+/* Perfect Circular Buttons */
 .btn {
   background: var(--btn-num);
   border: none;
-  border-radius: 9999px;
+  border-radius: 50%;
   color: #fff;
-  font-size: clamp(20px, 4vmin, 40px);
+  font-size: 32px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 1;
   margin: 0;
+  padding: 0;
 }
 
 .btn:active {
   background: var(--btn-num-active);
 }
 
-.btn.op { background: var(--btn-op); font-size: clamp(24px, 5vmin, 45px); }
+.btn.op { background: var(--btn-op); font-size: 38px; }
 .btn.op:active { background: var(--btn-op-active); }
-.btn.sec { background: var(--btn-sec); color: #000; font-weight: 500; font-size: clamp(18px, 4vmin, 32px); }
+.btn.sec { background: var(--btn-sec); color: #000; font-weight: 500; font-size: 28px; }
 .btn.sec:active { background: var(--btn-sec-active); }
+
+/* The Zero Button: Spans 2 columns, perfectly rounded pill */
 .btn.zero { 
   grid-column: span 2; 
-  border-radius: 9999px; 
+  aspect-ratio: auto; 
+  border-radius: 100px; 
   justify-content: flex-start; 
-  padding-left: 20%; 
+  padding-left: 28px; 
 }
-.btn.sci { font-size: clamp(14px, 3vmin, 24px); background: #222; }
+
+.btn.sci { font-size: 16px; background: #222; }
 .btn.sci:active { background: #444; }
 
 /* Math Notes Canvas */
 .math-notes {
   flex: 1;
   position: relative;
-  background: #111;
+  background: #1c1c1e;
   margin-bottom: 20px;
+  border-radius: 12px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -181,10 +198,10 @@ body, html {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-size: 25px 25px;
+  background-size: 30px 30px;
   background-image: 
-    linear-gradient(to right, #222 1px, transparent 1px),
-    linear-gradient(to bottom, #222 1px, transparent 1px);
+    linear-gradient(to right, #333 1px, transparent 1px),
+    linear-gradient(to bottom, #333 1px, transparent 1px);
   pointer-events: none;
 }
 
@@ -202,7 +219,7 @@ body, html {
   transform: translateX(-50%);
   display: flex;
   gap: 15px;
-  background: #222;
+  background: #2c2c2e;
   padding: 10px 20px;
   border-radius: 30px;
   z-index: 20;
@@ -235,7 +252,7 @@ body, html {
 
 .graph-overlay {
   position: absolute; bottom: 100px; right: 30px; 
-  width: min(90vw, 400px); height: min(50vh, 300px); 
+  width: 400px; height: 300px; 
   background: #000; 
   border-radius: 12px; padding: 20px; 
   border: 1px solid #333;
@@ -258,7 +275,7 @@ body, html {
 }
 
 .category-select {
-  background: #222;
+  background: #2c2c2e;
   color: white;
   padding: 8px 20px;
   border-radius: 8px;
@@ -268,7 +285,7 @@ body, html {
 }
 
 .unit-box {
-  background: #111;
+  background: #1c1c1e;
   border-radius: 12px;
   padding: 20px;
   display: flex;
